@@ -1,0 +1,53 @@
+{
+  "name": "@lg/core",
+  "version": "0.1.0",
+  "description": "A framework-agnostic component library with loose Tailwind coupling",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./button": {
+      "import": "./dist/components/button/index.js",
+      "require": "./dist/components/button/index.cjs",
+      "types": "./dist/components/button/index.d.ts"
+    },
+    "./input": {
+      "import": "./dist/components/input/index.js",
+      "require": "./dist/components/input/index.cjs",
+      "types": "./dist/components/input/index.d.ts"
+    },
+    "./tokens": "./dist/tokens/tokens.css",
+    "./styles": "./dist/styles.css"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": ["ui", "components", "tailwind", "design-system"],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.13",
+    "@types/react-dom": "^19.2.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "typescript": "^5.9.3"
+  }
+}

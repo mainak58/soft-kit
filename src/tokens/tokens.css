@@ -1,0 +1,132 @@
+/*
+ * ============================================
+ * Design Tokens — Framework Agnostic
+ * ============================================
+ * These CSS variables are the SINGLE SOURCE OF TRUTH
+ * for the entire design system. Tailwind (or any
+ * utility framework) is configured to CONSUME these,
+ * not the other way around.
+ *
+ * To theme: override these variables on any container.
+ * ============================================
+ */
+
+:root {
+  /* ---- Colors (using oklch for wide-gamut support) ---- */
+
+  /* Primary */
+  --lib-color-primary: oklch(0.55 0.18 250);
+  --lib-color-primary-hover: oklch(0.48 0.18 250);
+  --lib-color-primary-active: oklch(0.42 0.18 250);
+  --lib-color-primary-foreground: oklch(0.98 0 0);
+
+  /* Secondary */
+  --lib-color-secondary: oklch(0.93 0.01 260);
+  --lib-color-secondary-hover: oklch(0.88 0.01 260);
+  --lib-color-secondary-active: oklch(0.83 0.01 260);
+  --lib-color-secondary-foreground: oklch(0.15 0.01 260);
+
+  /* Destructive */
+  --lib-color-destructive: oklch(0.55 0.2 25);
+  --lib-color-destructive-hover: oklch(0.48 0.2 25);
+  --lib-color-destructive-active: oklch(0.42 0.2 25);
+  --lib-color-destructive-foreground: oklch(0.98 0 0);
+
+  /* Outline / Ghost */
+  --lib-color-outline-border: oklch(0.8 0.01 260);
+  --lib-color-outline-hover: oklch(0.95 0.01 260);
+  --lib-color-ghost-hover: oklch(0.95 0.01 260);
+
+  /* Foreground */
+  --lib-color-foreground: oklch(0.15 0.01 260);
+
+  /* ---- Typography ---- */
+  --lib-font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --lib-font-weight-normal: 400;
+  --lib-font-weight-medium: 500;
+  --lib-font-weight-semibold: 600;
+
+  --lib-font-size-xs: 0.75rem;   /* 12px */
+  --lib-font-size-sm: 0.875rem;  /* 14px */
+  --lib-font-size-base: 1rem;    /* 16px */
+
+  /* ---- Spacing ---- */
+  --lib-spacing-1: 0.25rem;
+  --lib-spacing-2: 0.5rem;
+  --lib-spacing-3: 0.75rem;
+  --lib-spacing-4: 1rem;
+  --lib-spacing-5: 1.25rem;
+  --lib-spacing-6: 1.5rem;
+
+  /* ---- Border Radius ---- */
+  --lib-radius-sm: 0.25rem;
+  --lib-radius-md: 0.375rem;
+  --lib-radius-lg: 0.5rem;
+  --lib-radius-xl: 0.75rem;
+  --lib-radius-full: 9999px;
+
+  /* ---- Sizing (component heights) ---- */
+  --lib-size-sm: 2rem;       /* 32px */
+  --lib-size-md: 2.5rem;     /* 40px */
+  --lib-size-lg: 2.75rem;    /* 44px */
+  --lib-size-icon: 2.25rem;  /* 36px */
+
+  /* ---- Transitions ---- */
+  --lib-transition-fast: 120ms ease;
+  --lib-transition-normal: 200ms ease;
+
+  /* ---- Focus ring ---- */
+  --lib-ring-width: 2px;
+  --lib-ring-offset: 2px;
+  --lib-ring-color: oklch(0.55 0.18 250);
+
+  /* ---- Input ---- */
+  --lib-input-border: oklch(0.8 0.01 260);
+  --lib-input-border-hover: oklch(0.65 0.01 260);
+  --lib-input-border-focus: oklch(0.55 0.18 250);
+  --lib-input-bg: oklch(1 0 0);
+  --lib-input-foreground: oklch(0.15 0.01 260);
+  --lib-input-placeholder: oklch(0.55 0.01 260);
+  --lib-input-disabled-bg: oklch(0.96 0.005 260);
+  --lib-input-error-border: oklch(0.55 0.2 25);
+  --lib-input-error-text: oklch(0.55 0.2 25);
+
+  /* ---- Shadows ---- */
+  --lib-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+/* ---- Dark mode ---- */
+[data-theme="dark"],
+.dark {
+  --lib-color-primary: oklch(0.7 0.18 250);
+  --lib-color-primary-hover: oklch(0.75 0.18 250);
+  --lib-color-primary-active: oklch(0.65 0.18 250);
+  --lib-color-primary-foreground: oklch(0.1 0 0);
+
+  --lib-color-secondary: oklch(0.25 0.01 260);
+  --lib-color-secondary-hover: oklch(0.3 0.01 260);
+  --lib-color-secondary-active: oklch(0.35 0.01 260);
+  --lib-color-secondary-foreground: oklch(0.93 0.01 260);
+
+  --lib-color-destructive: oklch(0.6 0.2 25);
+  --lib-color-destructive-hover: oklch(0.65 0.2 25);
+  --lib-color-destructive-active: oklch(0.55 0.2 25);
+  --lib-color-destructive-foreground: oklch(0.98 0 0);
+
+  --lib-color-outline-border: oklch(0.35 0.01 260);
+  --lib-color-outline-hover: oklch(0.25 0.01 260);
+  --lib-color-ghost-hover: oklch(0.25 0.01 260);
+
+  --lib-color-foreground: oklch(0.93 0.01 260);
+
+  /* Input (dark) */
+  --lib-input-border: oklch(0.35 0.01 260);
+  --lib-input-border-hover: oklch(0.5 0.01 260);
+  --lib-input-border-focus: oklch(0.7 0.18 250);
+  --lib-input-bg: oklch(0.18 0.005 260);
+  --lib-input-foreground: oklch(0.93 0.01 260);
+  --lib-input-placeholder: oklch(0.5 0.01 260);
+  --lib-input-disabled-bg: oklch(0.22 0.005 260);
+  --lib-input-error-border: oklch(0.6 0.2 25);
+  --lib-input-error-text: oklch(0.65 0.2 25);
+}
