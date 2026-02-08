@@ -1,0 +1,6 @@
+{
+  "name": "button",
+  "description": "A versatile button with variants, sizes, and loading state",
+  "registryDependencies": [],
+  "npmDependencies": ["clsx", "tailwind-merge"]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@test-kit/cli",
+  "version": "0.1.0",
+  "description": "CLI to add @test-kit components into your project",
+  "type": "module",
+  "bin": {
+    "test-kit": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.0.0"
+  }
+}

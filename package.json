@@ -1,5 +1,5 @@
 {
-  "name": "@lg/core",
+  "name": "@test-kit/core",
   "version": "0.1.0",
   "description": "A framework-agnostic component library with loose Tailwind coupling",
   "type": "module",
@@ -8,31 +8,43 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     },
     "./button": {
+      "types": "./dist/components/button/index.d.ts",
       "import": "./dist/components/button/index.js",
-      "require": "./dist/components/button/index.cjs",
-      "types": "./dist/components/button/index.d.ts"
+      "require": "./dist/components/button/index.cjs"
     },
     "./input": {
+      "types": "./dist/components/input/index.d.ts",
       "import": "./dist/components/input/index.js",
-      "require": "./dist/components/input/index.cjs",
-      "types": "./dist/components/input/index.d.ts"
+      "require": "./dist/components/input/index.cjs"
     },
-    "./tokens": "./dist/tokens/tokens.css",
-    "./styles": "./dist/styles.css"
+    "./tokens": "./dist/tokens/tokens.css"
   },
   "sideEffects": [
     "*.css"
   ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "registry": "node scripts/generate-registry.js",
+    "build:cli": "npm run registry && cd cli && npm run build",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": ["ui", "components", "tailwind", "design-system"],
+  "keywords": [
+    "ui",
+    "components",
+    "tailwind",
+    "design-system"
+  ],
   "author": "",
   "license": "MIT",
   "peerDependencies": {
@@ -48,6 +60,7 @@
     "@types/react-dom": "^19.2.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }
 }

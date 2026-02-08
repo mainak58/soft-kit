@@ -1,0 +1,6 @@
+{
+  "name": "input",
+  "description": "An input with sizes, error state, and start/end adornments",
+  "registryDependencies": [],
+  "npmDependencies": ["clsx", "tailwind-merge"]
+}
