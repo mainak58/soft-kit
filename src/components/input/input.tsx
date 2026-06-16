@@ -3,8 +3,9 @@
  * Input Component
  * ============================================
  * Zero Tailwind knowledge — all styling comes from
- * input.styles.ts (the adapter). All design values
- * come from tokens.css (CSS variables).
+ * input.styles.ts (the adapter). The custom rules in
+ * input.css (appended to your global stylesheet by the CLI)
+ * target the `sk-input` class on the field.
  * ============================================
  */
 

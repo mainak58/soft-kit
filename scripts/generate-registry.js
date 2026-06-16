@@ -19,7 +19,6 @@ import path from "node:path";
 const ROOT = path.resolve(import.meta.dirname, "..");
 const COMPONENTS_DIR = path.join(ROOT, "src", "components");
 const LIB_DIR = path.join(ROOT, "src", "lib");
-const TOKENS_DIR = path.join(ROOT, "src", "tokens");
 const OUTPUT = path.join(ROOT, "cli", "src", "registry.ts");
 
 // ─── Helpers ────────────────────────────────────────────
@@ -107,7 +106,6 @@ function generate() {
   // Read shared lib files
   const cnContent = readFile(path.join(LIB_DIR, "cn.ts"));
   const variantsContent = readFile(path.join(LIB_DIR, "variants.ts"));
-  const tokensContent = readFile(path.join(TOKENS_DIR, "tokens.css"));
 
   // Scan component folders
   const componentDirs = fs
@@ -122,15 +120,21 @@ function generate() {
     const config = JSON.parse(readFile(path.join(componentDir, "component.json")));
     const mergedContent = buildComponentFile(componentDir, dir.name);
 
+    // Optional per-component CSS: <name>.css gets appended to the project's
+    // global stylesheet by the CLI. Components without one inject no CSS.
+    const cssPath = path.join(componentDir, `${dir.name}.css`);
+    const css = fs.existsSync(cssPath) ? readFile(cssPath) : null;
+
     components.push({
       name: config.name,
       description: config.description,
       registryDependencies: config.registryDependencies || [],
       npmDependencies: config.npmDependencies || [],
       content: mergedContent,
+      css,
     });
 
-    console.log(`  found: ${config.name} (${config.description})`);
+    console.log(`  found: ${config.name} (${config.description})${css ? " [+css]" : ""}`);
   }
 
   // Generate registry.ts
@@ -150,6 +154,8 @@ export interface RegistryComponent {
   files: RegistryFile[];
   registryDependencies: string[];
   npmDependencies: string[];
+  /** CSS appended to the project's global stylesheet, or null if none. */
+  css: string | null;
 }
 
 // ─── Shared utilities ───────────────────────────────────
@@ -162,10 +168,6 @@ export const LIB_FILES: Record<string, RegistryFile> = {
   variants: {
     path: "lib/variants.ts",
     content: \`${escapeTemplate(variantsContent)}\`,
-  },
-  tokens: {
-    path: "tokens/tokens.css",
-    content: \`${escapeTemplate(tokensContent)}\`,
   },
 };
 
@@ -186,6 +188,7 @@ export const REGISTRY: Record<string, RegistryComponent> = {
     ],
     registryDependencies: ${JSON.stringify(comp.registryDependencies)},
     npmDependencies: ${JSON.stringify(comp.npmDependencies)},
+    css: ${comp.css === null ? "null" : `\`${escapeTemplate(comp.css)}\``},
   },
 `;
   }

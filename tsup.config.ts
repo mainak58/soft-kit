@@ -14,6 +14,5 @@ export default defineConfig([
     external: ["react", "react-dom"],
     splitting: true,
     treeshake: true,
-    onSuccess: "node scripts/copy-css.js",
   },
 ]);

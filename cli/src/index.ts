@@ -14,17 +14,22 @@ interface TkConfig {
   alias: string;
   /** Where components are placed relative to project root */
   componentsDir: string;
+  /** Global stylesheet that component CSS is appended to */
+  globalCss: string;
 }
 
 const DEFAULT_CONFIG: TkConfig = {
   alias: "@",
   componentsDir: "src/components",
+  globalCss: "src/app/globals.css",
 };
 
 function loadConfig(): TkConfig | null {
   const configPath = path.resolve(process.cwd(), CONFIG_FILE);
   if (!fs.existsSync(configPath)) return null;
-  return JSON.parse(fs.readFileSync(configPath, "utf-8"));
+  const parsed = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+  // Backfill defaults so older config files keep working
+  return { ...DEFAULT_CONFIG, ...parsed };
 }
 
 function requireConfig(): TkConfig {
@@ -51,6 +56,31 @@ function writeFileWithLog(filePath: string, content: string, overwrite: boolean)
   ensureDir(path.dirname(filePath));
   fs.writeFileSync(filePath, content, "utf-8");
   console.log(pc.green(`  ${exists ? "overwrite" : "create"} ${filePath}`));
+}
+
+/**
+ * Append a component's CSS into the project's global stylesheet.
+ * Idempotent: each block is wrapped in soft-kit markers, so re-running
+ * `add` won't duplicate it. The global file is created if missing.
+ */
+function appendCss(globalCssPath: string, componentName: string, css: string) {
+  const absPath = path.resolve(process.cwd(), globalCssPath);
+  const startMarker = `/* soft-kit:${componentName} start */`;
+  const endMarker = `/* soft-kit:${componentName} end */`;
+
+  const existing = fs.existsSync(absPath) ? fs.readFileSync(absPath, "utf-8") : "";
+
+  if (existing.includes(startMarker)) {
+    console.log(pc.yellow(`  skip ${globalCssPath} (${componentName} css already present)`));
+    return;
+  }
+
+  const block = `${startMarker}\n${css.trim()}\n${endMarker}\n`;
+  const next = existing.trim().length > 0 ? `${existing.trimEnd()}\n\n${block}` : block;
+
+  ensureDir(path.dirname(absPath));
+  fs.writeFileSync(absPath, next, "utf-8");
+  console.log(pc.green(`  ${existing ? "update" : "create"} ${globalCssPath} (+ ${componentName} css)`));
 }
 
 function detectPackageManager(): "npm" | "pnpm" | "yarn" | "bun" {
@@ -98,11 +128,13 @@ program
   .description("Initialize soft-kit in your project")
   .option("-a, --alias <alias>", "import alias", DEFAULT_CONFIG.alias)
   .option("-d, --dir <dir>", "components directory", DEFAULT_CONFIG.componentsDir)
+  .option("-c, --css <path>", "global stylesheet for component CSS", DEFAULT_CONFIG.globalCss)
   .option("-y, --yes", "skip prompts, use defaults")
   .action((opts) => {
     const config: TkConfig = {
       alias: opts.alias,
       componentsDir: opts.dir,
+      globalCss: opts.css,
     };
 
     const configPath = path.resolve(process.cwd(), CONFIG_FILE);
@@ -110,24 +142,25 @@ program
     console.log(pc.green(`Created ${CONFIG_FILE}`));
     console.log(pc.dim(`  alias:         ${config.alias}`));
     console.log(pc.dim(`  componentsDir: ${config.componentsDir}`));
+    console.log(pc.dim(`  globalCss:     ${config.globalCss}`));
 
-    // Write shared lib files
+    // Write shared JS utilities at the src root (the alias target), NOT inside
+    // the components folder. e.g. componentsDir "src/components" puts lib at
+    // "src/lib". Existing files are left untouched. No CSS token file is
+    // created — components style themselves with plain Tailwind utilities,
+    // and any component-specific CSS is appended to globalCss on `add`.
     const baseDir = config.componentsDir;
+    const srcRoot = path.dirname(baseDir);
     console.log(pc.bold("\nInstalling shared utilities..."));
 
     writeFileWithLog(
-      path.resolve(process.cwd(), baseDir, LIB_FILES.cn.path),
+      path.resolve(process.cwd(), srcRoot, LIB_FILES.cn.path),
       LIB_FILES.cn.content,
       false
     );
     writeFileWithLog(
-      path.resolve(process.cwd(), baseDir, LIB_FILES.variants.path),
+      path.resolve(process.cwd(), srcRoot, LIB_FILES.variants.path),
       LIB_FILES.variants.content,
-      false
-    );
-    writeFileWithLog(
-      path.resolve(process.cwd(), baseDir, LIB_FILES.tokens.path),
-      LIB_FILES.tokens.content,
       false
     );
 
@@ -150,9 +183,12 @@ program
   .action((componentNames: string[], opts) => {
     const config = requireConfig();
     const baseDir = config.componentsDir;
+    const srcRoot = path.dirname(baseDir);
 
-    // Resolve alias: "@" → "@/components" based on componentsDir
-    // e.g. alias="@", componentsDir="src/components" → "@/components"
+    // The alias maps to the src root (e.g. "@" -> "src").
+    //   aliasRoot ("@")           -> shared util imports resolve to @/lib/cn
+    //   aliasBase ("@/components") -> used only for the "import with" hint
+    const aliasRoot = config.alias;
     const aliasBase = config.alias + "/" + path.basename(baseDir);
 
     for (const name of componentNames) {
@@ -167,34 +203,38 @@ program
 
       // Install registry dependencies first (other components it depends on)
       for (const dep of component.registryDependencies) {
-        if (!REGISTRY[dep]) continue;
-        const depFiles = REGISTRY[dep].files;
-        for (const file of depFiles) {
+        const depComp = REGISTRY[dep];
+        if (!depComp) continue;
+        for (const file of depComp.files) {
           const destPath = path.resolve(process.cwd(), baseDir, file.path);
           if (!fs.existsSync(destPath)) {
             console.log(pc.dim(`  installing dependency: ${dep}`));
-            const content = file.content.replaceAll("{{ALIAS}}", aliasBase);
+            const content = file.content.replaceAll("{{ALIAS}}", aliasRoot);
             writeFileWithLog(destPath, content, false);
           }
         }
+        // A dependency may also need its CSS appended to the global stylesheet
+        if (depComp.css) appendCss(config.globalCss, depComp.name, depComp.css);
       }
 
-      // Ensure shared lib files exist
+      // Ensure shared lib files exist at the src root (@/lib/*)
       for (const key of ["cn", "variants"] as const) {
         const libFile = LIB_FILES[key];
-        const destPath = path.resolve(process.cwd(), baseDir, libFile.path);
+        const destPath = path.resolve(process.cwd(), srcRoot, libFile.path);
         writeFileWithLog(destPath, libFile.content, false);
       }
 
-      // Ensure tokens exist
-      const tokensPath = path.resolve(process.cwd(), baseDir, LIB_FILES.tokens.path);
-      writeFileWithLog(tokensPath, LIB_FILES.tokens.content, false);
-
       // Write component files
       for (const file of component.files) {
-        const content = file.content.replaceAll("{{ALIAS}}", aliasBase);
+        const content = file.content.replaceAll("{{ALIAS}}", aliasRoot);
         const destPath = path.resolve(process.cwd(), baseDir, file.path);
         writeFileWithLog(destPath, content, opts.overwrite);
+      }
+
+      // Append this component's CSS to the global stylesheet (if it has any).
+      // Components like button ship no CSS, so nothing is written for them.
+      if (component.css) {
+        appendCss(config.globalCss, component.name, component.css);
       }
 
       // Install npm deps

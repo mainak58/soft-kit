@@ -4,9 +4,8 @@
  * ============================================
  * This file contains ZERO Tailwind knowledge.
  * All styling comes from button.styles.ts (the adapter).
- * All design values come from tokens.css (CSS variables).
  *
- * If Tailwind is replaced, this file stays untouched.
+ * Button needs no external CSS — it's pure Tailwind utilities.
  * ============================================
  */
 

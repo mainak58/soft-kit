@@ -4,12 +4,9 @@ import { variants } from "../../lib/variants";
  * ============================================
  * Button Style Adapter
  * ============================================
- * This is the ONLY file that knows about Tailwind classes.
- * If Tailwind changes syntax (v5, v6, etc.), you update
- * ONLY this file. The component itself never changes.
- *
- * All colors reference CSS variables from tokens.css,
- * so theming works regardless of Tailwind version.
+ * The ONLY file that knows about Tailwind classes.
+ * Colors are plain Tailwind utilities (with dark: variants
+ * for dark mode) — no external CSS or design-token file needed.
  * ============================================
  */
 
@@ -23,9 +20,9 @@ export const buttonVariants = variants({
     "cursor-pointer select-none",
     /* Transitions */
     "transition-colors duration-200 ease-in-out",
-    /* Focus ring — uses CSS variable so ring color is themeable */
+    /* Focus ring */
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-    "focus-visible:ring-[var(--lib-ring-color)]",
+    "focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400",
     /* Disabled */
     "disabled:pointer-events-none disabled:opacity-50",
     /* SVG icon sizing */
@@ -35,54 +32,45 @@ export const buttonVariants = variants({
   variants: {
     variant: {
       primary: [
-        "bg-[var(--lib-color-primary)]",
-        "text-[var(--lib-color-primary-foreground)]",
-        "hover:bg-[var(--lib-color-primary-hover)]",
-        "active:bg-[var(--lib-color-primary-active)]",
-        "shadow-sm",
+        "bg-blue-600 text-white shadow-sm",
+        "hover:bg-blue-700 active:bg-blue-800",
+        "dark:bg-blue-500 dark:hover:bg-blue-400 dark:active:bg-blue-600",
       ].join(" "),
 
       secondary: [
-        "bg-[var(--lib-color-secondary)]",
-        "text-[var(--lib-color-secondary-foreground)]",
-        "hover:bg-[var(--lib-color-secondary-hover)]",
-        "active:bg-[var(--lib-color-secondary-active)]",
+        "bg-gray-100 text-gray-900",
+        "hover:bg-gray-200 active:bg-gray-300",
+        "dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 dark:active:bg-gray-600",
       ].join(" "),
 
       destructive: [
-        "bg-[var(--lib-color-destructive)]",
-        "text-[var(--lib-color-destructive-foreground)]",
-        "hover:bg-[var(--lib-color-destructive-hover)]",
-        "active:bg-[var(--lib-color-destructive-active)]",
-        "shadow-sm",
+        "bg-red-600 text-white shadow-sm",
+        "hover:bg-red-700 active:bg-red-800",
+        "dark:bg-red-500 dark:hover:bg-red-400 dark:active:bg-red-600",
       ].join(" "),
 
       outline: [
-        "border border-[var(--lib-color-outline-border)]",
-        "bg-transparent",
-        "text-[var(--lib-color-foreground)]",
-        "hover:bg-[var(--lib-color-outline-hover)]",
+        "border border-gray-300 bg-transparent text-gray-900",
+        "hover:bg-gray-100",
+        "dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-800",
       ].join(" "),
 
       ghost: [
-        "bg-transparent",
-        "text-[var(--lib-color-foreground)]",
-        "hover:bg-[var(--lib-color-ghost-hover)]",
+        "bg-transparent text-gray-900 hover:bg-gray-100",
+        "dark:text-gray-100 dark:hover:bg-gray-800",
       ].join(" "),
 
       link: [
-        "bg-transparent",
-        "text-[var(--lib-color-primary)]",
-        "underline-offset-4",
-        "hover:underline",
+        "bg-transparent text-blue-600 underline-offset-4 hover:underline",
+        "dark:text-blue-400",
       ].join(" "),
     },
 
     size: {
-      sm: "h-[var(--lib-size-sm)] px-3 text-[length:var(--lib-font-size-xs)] rounded-[var(--lib-radius-md)] [&>svg]:size-3.5",
-      md: "h-[var(--lib-size-md)] px-4 py-2 text-[length:var(--lib-font-size-sm)] rounded-[var(--lib-radius-md)] [&>svg]:size-4",
-      lg: "h-[var(--lib-size-lg)] px-6 text-[length:var(--lib-font-size-base)] rounded-[var(--lib-radius-lg)] [&>svg]:size-5",
-      icon: "size-[var(--lib-size-icon)] rounded-[var(--lib-radius-md)] [&>svg]:size-4",
+      sm: "h-8 px-3 text-xs rounded-md [&>svg]:size-3.5",
+      md: "h-10 px-4 py-2 text-sm rounded-md [&>svg]:size-4",
+      lg: "h-11 px-6 text-base rounded-lg [&>svg]:size-5",
+      icon: "size-9 rounded-md [&>svg]:size-4",
     },
   },
 

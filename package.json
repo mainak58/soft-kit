@@ -21,12 +21,8 @@
       "types": "./dist/components/input/index.d.ts",
       "import": "./dist/components/input/index.js",
       "require": "./dist/components/input/index.cjs"
-    },
-    "./tokens": "./dist/tokens/tokens.css"
+    }
   },
-  "sideEffects": [
-    "*.css"
-  ],
   "files": [
     "dist",
     "README.md"
