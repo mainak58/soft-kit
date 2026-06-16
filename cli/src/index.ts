@@ -7,7 +7,7 @@ import { REGISTRY, LIB_FILES } from "./registry.js";
 
 // ─── Config ─────────────────────────────────────────────
 
-const CONFIG_FILE = "test-kit.config.json";
+const CONFIG_FILE = "soft-kit.config.json";
 
 interface TkConfig {
   /** Path alias for imports, e.g. "@" or "~/src" */
@@ -30,7 +30,7 @@ function loadConfig(): TkConfig | null {
 function requireConfig(): TkConfig {
   const config = loadConfig();
   if (!config) {
-    console.error(pc.red("No test-kit.config.json found. Run `test-kit init` first."));
+    console.error(pc.red("No soft-kit.config.json found. Run `soft-kit init` first."));
     process.exit(1);
   }
   return config;
@@ -87,15 +87,15 @@ function installDeps(deps: string[]) {
 const program = new Command();
 
 program
-  .name("test-kit")
-  .description("Add @test-kit components to your project")
+  .name("soft-kit")
+  .description("Add soft-kit UI components to your project")
   .version("0.1.0");
 
 // ── init ────────────────────────────────────────────────
 
 program
   .command("init")
-  .description("Initialize test-kit in your project")
+  .description("Initialize soft-kit in your project")
   .option("-a, --alias <alias>", "import alias", DEFAULT_CONFIG.alias)
   .option("-d, --dir <dir>", "components directory", DEFAULT_CONFIG.componentsDir)
   .option("-y, --yes", "skip prompts, use defaults")
@@ -136,8 +136,8 @@ program
     installDeps(["clsx", "tailwind-merge"]);
 
     console.log(pc.green(pc.bold("\nDone! Now add components:")));
-    console.log(pc.cyan("  test-kit add button"));
-    console.log(pc.cyan("  test-kit add input"));
+    console.log(pc.cyan("  npx soft-kit add button"));
+    console.log(pc.cyan("  npx soft-kit add input"));
   });
 
 // ── add ─────────────────────────────────────────────────
@@ -227,7 +227,7 @@ program
     for (const [name, comp] of Object.entries(REGISTRY)) {
       console.log(`  ${pc.cyan(name.padEnd(12))} ${pc.dim(comp.description)}`);
     }
-    console.log(pc.dim(`\nAdd with: test-kit add <name>`));
+    console.log(pc.dim(`\nAdd with: npx soft-kit add <name>`));
   });
 
 program.parse();

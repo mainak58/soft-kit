@@ -1,17 +1,33 @@
 {
-  "name": "@test-kit/cli",
+  "name": "soft-kit",
   "version": "0.1.0",
-  "description": "CLI to add @test-kit components into your project",
+  "description": "CLI to add soft-kit UI components into your project",
   "type": "module",
   "bin": {
-    "test-kit": "./dist/index.js"
+    "soft-kit": "./dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
+  "keywords": [
+    "ui",
+    "components",
+    "react",
+    "tailwind",
+    "cli",
+    "design-system",
+    "soft-kit"
+  ],
+  "license": "MIT",
+  "author": "",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "commander": "^13.1.0",

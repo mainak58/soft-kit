@@ -1,5 +1,5 @@
 {
-  "name": "@test-kit/core",
+  "name": "@soft-kit/core",
   "version": "0.1.0",
   "description": "A framework-agnostic component library with loose Tailwind coupling",
   "type": "module",

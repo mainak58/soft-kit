@@ -264,152 +264,11 @@ import { variants } from "{{ALIAS}}/lib/variants";
 import { forwardRef } from "react";
 import { cn } from "{{ALIAS}}/lib/cn";
 
-export interface ButtonProps extends ComponentPropsWithRef<"button"> {
-  /** Visual style variant */
-  variant?: "primary" | "secondary" | "destructive" | "outline" | "ghost" | "link";
-  /** Size preset */
-  size?: "sm" | "md" | "lg" | "icon";
-  /** Show loading spinner and disable interaction */
-  loading?: boolean;
-  /** Render as a child component (slot pattern) */
-  asChild?: boolean;
-}
+export interface ButtonProps extends ComponentPropsWithRef<"button"> {  /** Visual style variant */  variant?: "primary" | "secondary" | "destructive" | "outline" | "ghost" | "link";  /** Size preset */  size?: "sm" | "md" | "lg" | "icon";  /** Show loading spinner and disable interaction */  loading?: boolean;  /** Render as a child component (slot pattern) */  asChild?: boolean;}
 
-/**
- * ============================================
- * Button Style Adapter
- * ============================================
- * This is the ONLY file that knows about Tailwind classes.
- * If Tailwind changes syntax (v5, v6, etc.), you update
- * ONLY this file. The component itself never changes.
- *
- * All colors reference CSS variables from tokens.css,
- * so theming works regardless of Tailwind version.
- * ============================================
- */
-export const buttonVariants = variants({
-  base: [
-    /* Layout */
-    "inline-flex items-center justify-center gap-2",
-    /* Typography */
-    "font-medium whitespace-nowrap",
-    /* Interaction */
-    "cursor-pointer select-none",
-    /* Transitions */
-    "transition-colors duration-200 ease-in-out",
-    /* Focus ring — uses CSS variable so ring color is themeable */
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-    "focus-visible:ring-[var(--lib-ring-color)]",
-    /* Disabled */
-    "disabled:pointer-events-none disabled:opacity-50",
-    /* SVG icon sizing */
-    "[&>svg]:pointer-events-none [&>svg]:shrink-0",
-  ].join(" "),
-  variants: {
-    variant: {
-      primary: [
-        "bg-[var(--lib-color-primary)]",
-        "text-[var(--lib-color-primary-foreground)]",
-        "hover:bg-[var(--lib-color-primary-hover)]",
-        "active:bg-[var(--lib-color-primary-active)]",
-        "shadow-sm",
-      ].join(" "),
-      secondary: [
-        "bg-[var(--lib-color-secondary)]",
-        "text-[var(--lib-color-secondary-foreground)]",
-        "hover:bg-[var(--lib-color-secondary-hover)]",
-        "active:bg-[var(--lib-color-secondary-active)]",
-      ].join(" "),
-      destructive: [
-        "bg-[var(--lib-color-destructive)]",
-        "text-[var(--lib-color-destructive-foreground)]",
-        "hover:bg-[var(--lib-color-destructive-hover)]",
-        "active:bg-[var(--lib-color-destructive-active)]",
-        "shadow-sm",
-      ].join(" "),
-      outline: [
-        "border border-[var(--lib-color-outline-border)]",
-        "bg-transparent",
-        "text-[var(--lib-color-foreground)]",
-        "hover:bg-[var(--lib-color-outline-hover)]",
-      ].join(" "),
-      ghost: [
-        "bg-transparent",
-        "text-[var(--lib-color-foreground)]",
-        "hover:bg-[var(--lib-color-ghost-hover)]",
-      ].join(" "),
-      link: [
-        "bg-transparent",
-        "text-[var(--lib-color-primary)]",
-        "underline-offset-4",
-        "hover:underline",
-      ].join(" "),
-    },
-    size: {
-      sm: "h-[var(--lib-size-sm)] px-3 text-[length:var(--lib-font-size-xs)] rounded-[var(--lib-radius-md)] [&>svg]:size-3.5",
-      md: "h-[var(--lib-size-md)] px-4 py-2 text-[length:var(--lib-font-size-sm)] rounded-[var(--lib-radius-md)] [&>svg]:size-4",
-      lg: "h-[var(--lib-size-lg)] px-6 text-[length:var(--lib-font-size-base)] rounded-[var(--lib-radius-lg)] [&>svg]:size-5",
-      icon: "size-[var(--lib-size-icon)] rounded-[var(--lib-radius-md)] [&>svg]:size-4",
-    },
-  },
-  defaultVariants: {
-    variant: "primary",
-    size: "md",
-  },
-});
+/** * ============================================ * Button Style Adapter * ============================================ * This is the ONLY file that knows about Tailwind classes. * If Tailwind changes syntax (v5, v6, etc.), you update * ONLY this file. The component itself never changes. * * All colors reference CSS variables from tokens.css, * so theming works regardless of Tailwind version. * ============================================ */export const buttonVariants = variants({  base: [    /* Layout */    "inline-flex items-center justify-center gap-2",    /* Typography */    "font-medium whitespace-nowrap",    /* Interaction */    "cursor-pointer select-none",    /* Transitions */    "transition-colors duration-200 ease-in-out",    /* Focus ring — uses CSS variable so ring color is themeable */    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",    "focus-visible:ring-[var(--lib-ring-color)]",    /* Disabled */    "disabled:pointer-events-none disabled:opacity-50",    /* SVG icon sizing */    "[&>svg]:pointer-events-none [&>svg]:shrink-0",  ].join(" "),  variants: {    variant: {      primary: [        "bg-[var(--lib-color-primary)]",        "text-[var(--lib-color-primary-foreground)]",        "hover:bg-[var(--lib-color-primary-hover)]",        "active:bg-[var(--lib-color-primary-active)]",        "shadow-sm",      ].join(" "),      secondary: [        "bg-[var(--lib-color-secondary)]",        "text-[var(--lib-color-secondary-foreground)]",        "hover:bg-[var(--lib-color-secondary-hover)]",        "active:bg-[var(--lib-color-secondary-active)]",      ].join(" "),      destructive: [        "bg-[var(--lib-color-destructive)]",        "text-[var(--lib-color-destructive-foreground)]",        "hover:bg-[var(--lib-color-destructive-hover)]",        "active:bg-[var(--lib-color-destructive-active)]",        "shadow-sm",      ].join(" "),      outline: [        "border border-[var(--lib-color-outline-border)]",        "bg-transparent",        "text-[var(--lib-color-foreground)]",        "hover:bg-[var(--lib-color-outline-hover)]",      ].join(" "),      ghost: [        "bg-transparent",        "text-[var(--lib-color-foreground)]",        "hover:bg-[var(--lib-color-ghost-hover)]",      ].join(" "),      link: [        "bg-transparent",        "text-[var(--lib-color-primary)]",        "underline-offset-4",        "hover:underline",      ].join(" "),    },    size: {      sm: "h-[var(--lib-size-sm)] px-3 text-[length:var(--lib-font-size-xs)] rounded-[var(--lib-radius-md)] [&>svg]:size-3.5",      md: "h-[var(--lib-size-md)] px-4 py-2 text-[length:var(--lib-font-size-sm)] rounded-[var(--lib-radius-md)] [&>svg]:size-4",      lg: "h-[var(--lib-size-lg)] px-6 text-[length:var(--lib-font-size-base)] rounded-[var(--lib-radius-lg)] [&>svg]:size-5",      icon: "size-[var(--lib-size-icon)] rounded-[var(--lib-radius-md)] [&>svg]:size-4",    },  },  defaultVariants: {    variant: "primary",    size: "md",  },});
 
-/**
- * ============================================
- * Button Component
- * ============================================
- * This file contains ZERO Tailwind knowledge.
- * All styling comes from button.styles.ts (the adapter).
- * All design values come from tokens.css (CSS variables).
- *
- * If Tailwind is replaced, this file stays untouched.
- * ============================================
- */
-const Spinner = () => (
-  <svg
-    className="animate-spin"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
-    <circle
-      className="opacity-25"
-      cx="12"
-      cy="12"
-      r="10"
-      stroke="currentColor"
-      strokeWidth="4"
-    />
-    <path
-      className="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-    />
-  </svg>
-);
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, loading = false, disabled, children, ...props }, ref) => {
-    return (
-      <button
-        ref={ref}
-        className={cn(buttonVariants({ variant, size }), className)}
-        disabled={disabled || loading}
-        aria-busy={loading || undefined}
-        {...props}
-      >
-        {loading && <Spinner />}
-        {children}
-      </button>
-    );
-  }
-);
-Button.displayName = "Button";
-export { Button, buttonVariants };
+/** * ============================================ * Button Component * ============================================ * This file contains ZERO Tailwind knowledge. * All styling comes from button.styles.ts (the adapter). * All design values come from tokens.css (CSS variables). * * If Tailwind is replaced, this file stays untouched. * ============================================ */const Spinner = () => (  <svg    className="animate-spin"    xmlns="http://www.w3.org/2000/svg"    fill="none"    viewBox="0 0 24 24"    aria-hidden="true"  >    <circle      className="opacity-25"      cx="12"      cy="12"      r="10"      stroke="currentColor"      strokeWidth="4"    />    <path      className="opacity-75"      fill="currentColor"      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"    />  </svg>);const Button = forwardRef<HTMLButtonElement, ButtonProps>(  ({ className, variant, size, loading = false, disabled, children, ...props }, ref) => {    return (      <button        ref={ref}        className={cn(buttonVariants({ variant, size }), className)}        disabled={disabled || loading}        aria-busy={loading || undefined}        {...props}      >        {loading && <Spinner />}        {children}      </button>    );  });Button.displayName = "Button";export { Button, buttonVariants };
 `,
       },
     ],
@@ -429,124 +288,11 @@ import { variants } from "{{ALIAS}}/lib/variants";
 import { forwardRef } from "react";
 import { cn } from "{{ALIAS}}/lib/cn";
 
-export interface InputProps
-  extends Omit<ComponentPropsWithRef<"input">, "size"> {
-  /** Size preset */
-  size?: "sm" | "md" | "lg";
-  /** Show error styling */
-  error?: boolean;
-  /** Start adornment (icon, prefix text, etc.) */
-  startAdornment?: ReactNode;
-  /** End adornment (icon, clear button, etc.) */
-  endAdornment?: ReactNode;
-}
+export interface InputProps  extends Omit<ComponentPropsWithRef<"input">, "size"> {  /** Size preset */  size?: "sm" | "md" | "lg";  /** Show error styling */  error?: boolean;  /** Start adornment (icon, prefix text, etc.) */  startAdornment?: ReactNode;  /** End adornment (icon, clear button, etc.) */  endAdornment?: ReactNode;}
 
-/**
- * ============================================
- * Input Style Adapter
- * ============================================
- * ONLY file that knows about Tailwind classes.
- * All colors/sizing reference CSS variables from tokens.css.
- * ============================================
- */
-export const inputWrapperVariants = variants({
-  base: [
-    "flex items-center w-full",
-    "border border-[var(--lib-input-border)]",
-    "bg-[var(--lib-input-bg)]",
-    "text-[var(--lib-input-foreground)]",
-    "transition-colors duration-200 ease-in-out",
-    /* Focus-within for the wrapper so adornments are inside the ring */
-    "focus-within:border-[var(--lib-input-border-focus)]",
-    "focus-within:ring-2 focus-within:ring-[var(--lib-ring-color)] focus-within:ring-offset-2",
-    "hover:border-[var(--lib-input-border-hover)]",
-    /* Disabled */
-    "has-[:disabled]:opacity-50 has-[:disabled]:cursor-not-allowed",
-    "has-[:disabled]:bg-[var(--lib-input-disabled-bg)]",
-  ].join(" "),
-  variants: {
-    size: {
-      sm: "h-[var(--lib-size-sm)] px-2.5 rounded-[var(--lib-radius-md)] text-[length:var(--lib-font-size-xs)] gap-1.5",
-      md: "h-[var(--lib-size-md)] px-3 rounded-[var(--lib-radius-md)] text-[length:var(--lib-font-size-sm)] gap-2",
-      lg: "h-[var(--lib-size-lg)] px-4 rounded-[var(--lib-radius-lg)] text-[length:var(--lib-font-size-base)] gap-2.5",
-    },
-    error: {
-      true: [
-        "border-[var(--lib-input-error-border)]",
-        "focus-within:border-[var(--lib-input-error-border)]",
-        "focus-within:ring-[var(--lib-input-error-border)]",
-      ].join(" "),
-      false: "",
-    },
-  },
-  defaultVariants: {
-    size: "md",
-    error: "false",
-  },
-});
-export const inputFieldStyles = [
-  "flex-1 bg-transparent outline-none",
-  "placeholder:text-[var(--lib-input-placeholder)]",
-  "disabled:cursor-not-allowed",
-  /* Reset file input styling */
-  "file:border-0 file:bg-transparent file:font-medium file:text-[var(--lib-input-foreground)]",
-].join(" ");
-export const adornmentStyles = [
-  "flex shrink-0 items-center",
-  "text-[var(--lib-input-placeholder)]",
-  "[&>svg]:size-4",
-].join(" ");
+/** * ============================================ * Input Style Adapter * ============================================ * ONLY file that knows about Tailwind classes. * All colors/sizing reference CSS variables from tokens.css. * ============================================ */export const inputWrapperVariants = variants({  base: [    "flex items-center w-full",    "border border-[var(--lib-input-border)]",    "bg-[var(--lib-input-bg)]",    "text-[var(--lib-input-foreground)]",    "transition-colors duration-200 ease-in-out",    /* Focus-within for the wrapper so adornments are inside the ring */    "focus-within:border-[var(--lib-input-border-focus)]",    "focus-within:ring-2 focus-within:ring-[var(--lib-ring-color)] focus-within:ring-offset-2",    "hover:border-[var(--lib-input-border-hover)]",    /* Disabled */    "has-[:disabled]:opacity-50 has-[:disabled]:cursor-not-allowed",    "has-[:disabled]:bg-[var(--lib-input-disabled-bg)]",  ].join(" "),  variants: {    size: {      sm: "h-[var(--lib-size-sm)] px-2.5 rounded-[var(--lib-radius-md)] text-[length:var(--lib-font-size-xs)] gap-1.5",      md: "h-[var(--lib-size-md)] px-3 rounded-[var(--lib-radius-md)] text-[length:var(--lib-font-size-sm)] gap-2",      lg: "h-[var(--lib-size-lg)] px-4 rounded-[var(--lib-radius-lg)] text-[length:var(--lib-font-size-base)] gap-2.5",    },    error: {      true: [        "border-[var(--lib-input-error-border)]",        "focus-within:border-[var(--lib-input-error-border)]",        "focus-within:ring-[var(--lib-input-error-border)]",      ].join(" "),      false: "",    },  },  defaultVariants: {    size: "md",    error: "false",  },});export const inputFieldStyles = [  "flex-1 bg-transparent outline-none",  "placeholder:text-[var(--lib-input-placeholder)]",  "disabled:cursor-not-allowed",  /* Reset file input styling */  "file:border-0 file:bg-transparent file:font-medium file:text-[var(--lib-input-foreground)]",].join(" ");export const adornmentStyles = [  "flex shrink-0 items-center",  "text-[var(--lib-input-placeholder)]",  "[&>svg]:size-4",].join(" ");
 
-/**
- * ============================================
- * Input Component
- * ============================================
- * Zero Tailwind knowledge — all styling comes from
- * input.styles.ts (the adapter). All design values
- * come from tokens.css (CSS variables).
- * ============================================
- */
-const Input = forwardRef<HTMLInputElement, InputProps>(
-  (
-    {
-      className,
-      size,
-      error = false,
-      startAdornment,
-      endAdornment,
-      type,
-      disabled,
-      ...props
-    },
-    ref
-  ) => {
-    return (
-      <div
-        className={cn(
-          inputWrapperVariants({ size, error: error ? "true" : "false" }),
-          className
-        )}
-      >
-        {startAdornment && (
-          <span className={adornmentStyles}>{startAdornment}</span>
-        )}
-        <input
-          ref={ref}
-          type={type}
-          disabled={disabled}
-          aria-invalid={error || undefined}
-          className={inputFieldStyles}
-          {...props}
-        />
-        {endAdornment && (
-          <span className={adornmentStyles}>{endAdornment}</span>
-        )}
-      </div>
-    );
-  }
-);
-Input.displayName = "Input";
-export { Input, inputWrapperVariants };
+/** * ============================================ * Input Component * ============================================ * Zero Tailwind knowledge — all styling comes from * input.styles.ts (the adapter). All design values * come from tokens.css (CSS variables). * ============================================ */const Input = forwardRef<HTMLInputElement, InputProps>(  (    {      className,      size,      error = false,      startAdornment,      endAdornment,      type,      disabled,      ...props    },    ref  ) => {    return (      <div        className={cn(          inputWrapperVariants({ size, error: error ? "true" : "false" }),          className        )}      >        {startAdornment && (          <span className={adornmentStyles}>{startAdornment}</span>        )}        <input          ref={ref}          type={type}          disabled={disabled}          aria-invalid={error || undefined}          className={inputFieldStyles}          {...props}        />        {endAdornment && (          <span className={adornmentStyles}>{endAdornment}</span>        )}      </div>    );  });Input.displayName = "Input";export { Input, inputWrapperVariants };
 `,
       },
     ],
