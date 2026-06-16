@@ -1,0 +1,50 @@
+name: Publish CLI to npm
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      # Regenerate cli/src/registry.ts from src/components (pure node, no deps)
+      - name: Generate registry
+        run: node scripts/generate-registry.js
+
+      # Install the CLI's dependencies
+      - name: Install CLI deps
+        working-directory: cli
+        run: npm ci
+
+      # Skip publishing if this version is already on npm (avoids errors on
+      # pushes that don't bump the version)
+      - name: Check version
+        id: check
+        working-directory: cli
+        run: |
+          LOCAL=$(node -p "require('./package.json').version")
+          PUBLISHED=$(npm view soft-kit version 2>/dev/null || echo "none")
+          echo "local=$LOCAL  published=$PUBLISHED"
+          if [ "$LOCAL" = "$PUBLISHED" ]; then
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Publish (prepublishOnly rebuilds dist via tsup automatically)
+      - name: Publish
+        if: steps.check.outputs.should_publish == 'true'
+        working-directory: cli
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
