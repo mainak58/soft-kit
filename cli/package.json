@@ -1,6 +1,6 @@
 {
   "name": "soft-kit",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "CLI to add soft-kit UI components into your project",
   "type": "module",
   "bin": {
