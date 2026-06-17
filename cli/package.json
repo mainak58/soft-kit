@@ -20,7 +20,16 @@
     "soft-kit"
   ],
   "license": "MIT",
-  "author": "",
+  "author": "mainak58",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mainak58/soft-kit.git",
+    "directory": "cli"
+  },
+  "homepage": "https://github.com/mainak58/soft-kit#readme",
+  "bugs": {
+    "url": "https://github.com/mainak58/soft-kit/issues"
+  },
   "engines": {
     "node": ">=18"
   },
@@ -37,5 +46,8 @@
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "@types/node": "^22.0.0"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
   }
 }

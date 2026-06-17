@@ -46,8 +46,19 @@
     "tailwind",
     "design-system"
   ],
-  "author": "",
+  "author": "mainak58",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mainak58/soft-kit.git"
+  },
+  "homepage": "https://github.com/mainak58/soft-kit#readme",
+  "bugs": {
+    "url": "https://github.com/mainak58/soft-kit/issues"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
   "peerDependencies": {
     "lucide-react": ">=0.300.0",
     "react": ">=18",
