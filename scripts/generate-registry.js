@@ -56,7 +56,23 @@ function buildComponentFile(componentDir, componentName) {
     return order(a) - order(b);
   });
 
-  const imports = new Set();
+  // Imports are merged per source module so that two files importing from the
+  // same package (e.g. both pulling `ReactNode` from "react") don't emit a
+  // duplicate identifier in the merged output.
+  const importsBySource = new Map(); // source -> { default, defaultType, namespace, named: Map<spec, isType> }
+  const sourceOrder = [];
+  const getImportEntry = (source) => {
+    if (!importsBySource.has(source)) {
+      importsBySource.set(source, {
+        default: null,
+        defaultType: false,
+        namespace: null,
+        named: new Map(),
+      });
+      sourceOrder.push(source);
+    }
+    return importsBySource.get(source);
+  };
   const bodyParts = [];
   let useClient = false;
 
@@ -72,22 +88,63 @@ function buildComponentFile(componentDir, componentName) {
       content = content.replace(directiveRegex, "");
     }
 
-    // Match both single-line and multi-line imports:
-    //   import { foo } from "bar";
-    //   import {\n  foo,\n  bar,\n} from "baz";
-    const importRegex = /^import\s+(?:[\s\S]*?)from\s+["']([^"']+)["'];?\s*$/gm;
+    // Parse each import (single- or multi-line) and merge it by source module.
+    const importRegex = /^import\s+([\s\S]*?)\s+from\s+["']([^"']+)["'];?\s*$/gm;
     let match;
 
     while ((match = importRegex.exec(content)) !== null) {
-      const source = match[1];
+      let clause = match[1].trim();
+      let source = match[2];
       // Skip local imports (./button.styles, ./button.types) — they get inlined
       if (source.startsWith("./")) continue;
-      // Rewrite lib imports
+      // Rewrite lib imports: ../../lib/cn -> {{ALIAS}}/lib/cn
       if (source.includes("../../lib/")) {
-        const libFile = source.replace("../../lib/", "");
-        imports.add(match[0].replace(source, `{{ALIAS}}/lib/${libFile}`));
-      } else {
-        imports.add(match[0]);
+        source = source.replace("../../lib/", "{{ALIAS}}/lib/");
+      }
+      const entry = getImportEntry(source);
+
+      // Whole-statement type-only import? ("import type ...")
+      let stmtType = false;
+      if (/^type\s+/.test(clause)) {
+        stmtType = true;
+        clause = clause.replace(/^type\s+/, "");
+      }
+
+      // Namespace import: "* as Foo"
+      const ns = clause.match(/^\*\s+as\s+([A-Za-z0-9_$]+)$/);
+      if (ns) {
+        entry.namespace = ns[1];
+        continue;
+      }
+
+      // Split optional default name from the named "{ ... }" block
+      let namedPart = null;
+      const braceIdx = clause.indexOf("{");
+      if (braceIdx !== -1) {
+        const before = clause.slice(0, braceIdx).replace(/,\s*$/, "").trim();
+        if (before) {
+          entry.default = before;
+          if (stmtType) entry.defaultType = true;
+        }
+        namedPart = clause.slice(braceIdx + 1, clause.lastIndexOf("}"));
+      } else if (clause) {
+        entry.default = clause;
+        if (stmtType) entry.defaultType = true;
+      }
+
+      if (namedPart !== null) {
+        for (let spec of namedPart.split(",")) {
+          spec = spec.trim();
+          if (!spec) continue;
+          let isType = stmtType;
+          if (/^type\s+/.test(spec)) {
+            isType = true;
+            spec = spec.replace(/^type\s+/, "").trim();
+          }
+          // A name is type-only only if EVERY occurrence of it is type-only
+          const prev = entry.named.get(spec);
+          entry.named.set(spec, prev === undefined ? isType : prev && isType);
+        }
       }
     }
 
@@ -103,10 +160,34 @@ function buildComponentFile(componentDir, componentName) {
     }
   }
 
-  // Combine: optional "use client" directive, then imports, then body
+  // Emit one merged import statement per source module.
+  const importLines = [];
+  for (const source of sourceOrder) {
+    const e = importsBySource.get(source);
+    if (e.namespace) {
+      importLines.push(`import * as ${e.namespace} from "${source}";`);
+    }
+    const named = [...e.named.entries()];
+    const hasDefault = !!e.default;
+    if (!hasDefault && named.length === 0) continue;
+
+    // A statement can be a single `import type { ... }` only when there's no
+    // default and every named specifier is type-only; otherwise mark types inline.
+    const typeOnlyStmt = !hasDefault && named.length > 0 && named.every(([, t]) => t);
+
+    const segs = [];
+    if (hasDefault) segs.push(e.default);
+    if (named.length > 0) {
+      const specs = named.map(([name, t]) =>
+        typeOnlyStmt ? name : t ? `type ${name}` : name
+      );
+      segs.push(`{ ${specs.join(", ")} }`);
+    }
+    importLines.push(`import ${typeOnlyStmt ? "type " : ""}${segs.join(", ")} from "${source}";`);
+  }
+
   const prefix = useClient ? `"use client";\n\n` : "";
-  const combined =
-    prefix + [...imports].join("\n") + "\n\n" + bodyParts.join("\n\n") + "\n";
+  const combined = prefix + importLines.join("\n") + "\n\n" + bodyParts.join("\n\n") + "\n";
   return combined;
 }
 

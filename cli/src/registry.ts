@@ -123,11 +123,8 @@ export const REGISTRY: Record<string, RegistryComponent> = {
     files: [
       {
         path: "ui/button.tsx",
-        content: `import type { ComponentPropsWithRef } from "react";
-
+        content: `import { type ComponentPropsWithRef, forwardRef } from "react";
 import { variants } from "{{ALIAS}}/lib/variants";
-
-import { forwardRef } from "react";
 import { cn } from "{{ALIAS}}/lib/cn";
 
 export interface ButtonProps extends ComponentPropsWithRef<"button"> {  /** Visual style variant */  variant?: "primary" | "secondary" | "destructive" | "outline" | "ghost" | "link";  /** Size preset */  size?: "sm" | "md" | "lg" | "icon";  /** Show loading spinner and disable interaction */  loading?: boolean;  /** Render as a child component (slot pattern) */  asChild?: boolean;}
@@ -217,11 +214,8 @@ export const buttonVariants = variants({
     files: [
       {
         path: "ui/input.tsx",
-        content: `import type { ComponentPropsWithRef, ReactNode } from "react";
-
+        content: `import { type ComponentPropsWithRef, type ReactNode, forwardRef } from "react";
 import { variants } from "{{ALIAS}}/lib/variants";
-
-import { forwardRef } from "react";
 import { cn } from "{{ALIAS}}/lib/cn";
 
 export interface InputProps  extends Omit<ComponentPropsWithRef<"input">, "size"> {  /** Size preset */  size?: "sm" | "md" | "lg";  /** Show error styling */  error?: boolean;  /** Start adornment (icon, prefix text, etc.) */  startAdornment?: ReactNode;  /** End adornment (icon, clear button, etc.) */  endAdornment?: ReactNode;}
@@ -325,23 +319,8 @@ export const adornmentStyles = [
         path: "ui/sidebar.tsx",
         content: `"use client";
 
-import type { ComponentType, ReactNode } from "react";
-
-import {
-  createContext,
-  forwardRef,
-  useContext,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  ChevronRight,
-  ChevronsUpDown,
-  Command,
-  PanelLeft,
-  PanelLeftClose,
-  Search,
-} from "lucide-react";
+import { type ComponentType, type ReactNode, createContext, forwardRef, useContext, useState } from "react";
+import { ChevronRight, ChevronsUpDown, Command, PanelLeft, PanelLeftClose, Search } from "lucide-react";
 import { cn } from "{{ALIAS}}/lib/cn";
 
 export interface SidebarItem {
