@@ -58,9 +58,19 @@ function buildComponentFile(componentDir, componentName) {
 
   const imports = new Set();
   const bodyParts = [];
+  let useClient = false;
 
   for (const file of files) {
     let content = readFile(path.join(componentDir, file));
+
+    // Detect + strip a "use client" / "use server" directive from each file.
+    // It must end up as the very first line of the merged output (above
+    // imports), so we hoist it instead of leaving it in the body.
+    const directiveRegex = /^\s*["']use (?:client|server)["'];?\s*$/m;
+    if (directiveRegex.test(content)) {
+      useClient = true;
+      content = content.replace(directiveRegex, "");
+    }
 
     // Match both single-line and multi-line imports:
     //   import { foo } from "bar";
@@ -93,8 +103,10 @@ function buildComponentFile(componentDir, componentName) {
     }
   }
 
-  // Combine: imports at top, then body
-  const combined = [...imports].join("\n") + "\n\n" + bodyParts.join("\n\n") + "\n";
+  // Combine: optional "use client" directive, then imports, then body
+  const prefix = useClient ? `"use client";\n\n` : "";
+  const combined =
+    prefix + [...imports].join("\n") + "\n\n" + bodyParts.join("\n\n") + "\n";
   return combined;
 }
 

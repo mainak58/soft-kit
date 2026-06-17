@@ -15,7 +15,18 @@ Add components:
 ```bash
 npx soft-kit add button
 npx soft-kit add input
+npx soft-kit add sidebar
 npx soft-kit add button input   # multiple at once
+```
+
+Each component's npm dependencies (e.g. `lucide-react` for the sidebar) are installed
+automatically, so you won't hit missing-module errors.
+
+Update components after a new release:
+
+```bash
+npx soft-kit update sidebar     # re-fetch one component (overwrites your copy)
+npx soft-kit update all         # update every installed soft-kit component
 ```
 
 List everything available:
@@ -33,6 +44,9 @@ npx soft-kit list
 
 `add`:
 - `-o, --overwrite` — overwrite existing files
+
+`update`:
+- accepts one or more component names, or `all`
 
 ## How it works
 

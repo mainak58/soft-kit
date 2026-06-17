@@ -59,28 +59,56 @@ function writeFileWithLog(filePath: string, content: string, overwrite: boolean)
 }
 
 /**
- * Append a component's CSS into the project's global stylesheet.
- * Idempotent: each block is wrapped in soft-kit markers, so re-running
- * `add` won't duplicate it. The global file is created if missing.
+ * Sync a component's CSS into the project's global stylesheet.
+ * Each block is wrapped in soft-kit markers so it's idempotent.
+ *   - overwrite=false (add):    skip if a block already exists
+ *   - overwrite=true  (update): replace the existing block in place
+ * The global file is created if missing.
  */
-function appendCss(globalCssPath: string, componentName: string, css: string) {
+function syncCss(
+  globalCssPath: string,
+  componentName: string,
+  css: string,
+  overwrite: boolean
+) {
   const absPath = path.resolve(process.cwd(), globalCssPath);
   const startMarker = `/* soft-kit:${componentName} start */`;
   const endMarker = `/* soft-kit:${componentName} end */`;
+  const block = `${startMarker}\n${css.trim()}\n${endMarker}`;
 
   const existing = fs.existsSync(absPath) ? fs.readFileSync(absPath, "utf-8") : "";
+  const start = existing.indexOf(startMarker);
+  const hasBlock = start !== -1;
 
-  if (existing.includes(startMarker)) {
+  if (hasBlock && !overwrite) {
     console.log(pc.yellow(`  skip ${globalCssPath} (${componentName} css already present)`));
     return;
   }
 
-  const block = `${startMarker}\n${css.trim()}\n${endMarker}\n`;
-  const next = existing.trim().length > 0 ? `${existing.trimEnd()}\n\n${block}` : block;
+  let next: string;
+  if (hasBlock) {
+    // Replace the existing block (markers included) in place
+    const end = existing.indexOf(endMarker) + endMarker.length;
+    next = existing.slice(0, start) + block + existing.slice(end);
+  } else {
+    next = existing.trim().length > 0 ? `${existing.trimEnd()}\n\n${block}\n` : `${block}\n`;
+  }
 
   ensureDir(path.dirname(absPath));
   fs.writeFileSync(absPath, next, "utf-8");
-  console.log(pc.green(`  ${existing ? "update" : "create"} ${globalCssPath} (+ ${componentName} css)`));
+  const verb = hasBlock ? "update" : existing ? "update" : "create";
+  console.log(pc.green(`  ${verb} ${globalCssPath} (${componentName} css)`));
+}
+
+/**
+ * Is a component already present in the user's project? (any of its files)
+ */
+function isInstalled(name: string, baseDir: string): boolean {
+  const comp = REGISTRY[name];
+  if (!comp) return false;
+  return comp.files.some((f) =>
+    fs.existsSync(path.resolve(process.cwd(), baseDir, f.path))
+  );
 }
 
 function detectPackageManager(): "npm" | "pnpm" | "yarn" | "bun" {
@@ -214,7 +242,7 @@ program
           }
         }
         // A dependency may also need its CSS appended to the global stylesheet
-        if (depComp.css) appendCss(config.globalCss, depComp.name, depComp.css);
+        if (depComp.css) syncCss(config.globalCss, depComp.name, depComp.css, false);
       }
 
       // Ensure shared lib files exist at the src root (@/lib/*)
@@ -234,7 +262,7 @@ program
       // Append this component's CSS to the global stylesheet (if it has any).
       // Components like button ship no CSS, so nothing is written for them.
       if (component.css) {
-        appendCss(config.globalCss, component.name, component.css);
+        syncCss(config.globalCss, component.name, component.css, false);
       }
 
       // Install npm deps
@@ -255,6 +283,71 @@ program
       const exportName = name.charAt(0).toUpperCase() + name.slice(1);
       console.log(pc.cyan(`  import { ${exportName} } from "${importPath}";`));
     }
+  });
+
+// ── update ──────────────────────────────────────────────
+
+program
+  .command("update")
+  .description("Re-fetch installed component(s) to the latest version")
+  .argument("<components...>", 'component name(s), or "all"')
+  .action((componentNames: string[]) => {
+    const config = requireConfig();
+    const baseDir = config.componentsDir;
+    const srcRoot = path.dirname(baseDir);
+    const aliasRoot = config.alias;
+
+    // Resolve which components to update
+    let targets: string[];
+    if (componentNames.length === 1 && componentNames[0] === "all") {
+      targets = Object.keys(REGISTRY).filter((name) => isInstalled(name, baseDir));
+      if (targets.length === 0) {
+        console.log(pc.yellow("No soft-kit components found in this project."));
+        return;
+      }
+      console.log(pc.dim(`Updating: ${targets.join(", ")}`));
+    } else {
+      targets = componentNames;
+    }
+
+    for (const name of targets) {
+      const component = REGISTRY[name];
+      if (!component) {
+        console.error(pc.red(`Unknown component: "${name}"`));
+        console.log(pc.dim(`Available: ${Object.keys(REGISTRY).join(", ")}`));
+        process.exit(1);
+      }
+
+      if (!isInstalled(name, baseDir)) {
+        console.log(
+          pc.yellow(`\n${name} is not installed — use \`npx soft-kit add ${name}\``)
+        );
+        continue;
+      }
+
+      console.log(pc.bold(`\nUpdating ${pc.cyan(component.name)}...`));
+
+      // Overwrite the component files with the latest version
+      for (const file of component.files) {
+        const content = file.content.replaceAll("{{ALIAS}}", aliasRoot);
+        const destPath = path.resolve(process.cwd(), baseDir, file.path);
+        writeFileWithLog(destPath, content, true);
+      }
+
+      // Refresh its CSS block in place (replace, don't duplicate)
+      if (component.css) {
+        syncCss(config.globalCss, component.name, component.css, true);
+      }
+
+      // Make sure any (possibly new) dependencies are installed
+      if (component.npmDependencies.length > 0) {
+        installDeps(component.npmDependencies);
+      }
+
+      console.log(pc.green(`  ${component.name} updated!`));
+    }
+
+    console.log(pc.green(pc.bold("\nDone!")));
   });
 
 // ── list ────────────────────────────────────────────────

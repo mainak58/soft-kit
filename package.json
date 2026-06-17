@@ -21,6 +21,11 @@
       "types": "./dist/components/input/index.d.ts",
       "import": "./dist/components/input/index.js",
       "require": "./dist/components/input/index.cjs"
+    },
+    "./sidebar": {
+      "types": "./dist/components/sidebar/index.d.ts",
+      "import": "./dist/components/sidebar/index.js",
+      "require": "./dist/components/sidebar/index.cjs"
     }
   },
   "files": [
@@ -44,8 +49,14 @@
   "author": "",
   "license": "MIT",
   "peerDependencies": {
+    "lucide-react": ">=0.300.0",
     "react": ">=18",
     "react-dom": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "lucide-react": {
+      "optional": true
+    }
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -54,6 +65,7 @@
   "devDependencies": {
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
+    "lucide-react": "^0.456.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tsup": "^8.5.1",
