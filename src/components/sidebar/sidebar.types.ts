@@ -27,6 +27,18 @@ export interface SidebarProps {
   /** Show the search box (visual only — wire it up yourself). */
   showSearch?: boolean;
   /**
+   * Current dark-mode state. When provided (even `false`), a light/dark toggle
+   * button renders pinned to the bottom of the sidebar. Omit the prop entirely
+   * to hide the button.
+   */
+  darkMode?: boolean;
+  /**
+   * Called with the next dark-mode state when the toggle is pressed.
+   * Wire this to your theme state (e.g. toggle the `dark` class on <html>).
+   * @example onDarkModeChange={(next) => document.documentElement.classList.toggle("dark", next)}
+   */
+  onDarkModeChange?: (next: boolean) => void;
+  /**
    * Custom link renderer — plug in next/link or your router's Link.
    * Defaults to a plain <a>.
    * @example renderLink={({ href, className, children }) => <Link href={href} className={className}>{children}</Link>}

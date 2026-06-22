@@ -5,9 +5,11 @@ import {
   ChevronRight,
   ChevronsUpDown,
   Command,
+  Moon,
   PanelLeft,
   PanelLeftClose,
   Search,
+  Sun,
 } from "lucide-react";
 import { cn } from "../../lib/cn";
 import {
@@ -194,6 +196,49 @@ function SidebarNavItem({ item, depth = 0 }: NavItemProps) {
   );
 }
 
+interface ThemeToggleProps {
+  darkMode: boolean;
+  onDarkModeChange?: (next: boolean) => void;
+}
+
+function ThemeToggle({ darkMode, onDarkModeChange }: ThemeToggleProps) {
+  const { collapsed } = useSidebar();
+  const Icon = darkMode ? Sun : Moon;
+  const label = darkMode ? "Light mode" : "Dark mode";
+  const toggle = () => onDarkModeChange?.(!darkMode);
+
+  const baseClass =
+    "flex w-full cursor-pointer items-center rounded-lg border border-gray-200 text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900 active:scale-[0.97] dark:border-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100";
+
+  if (collapsed) {
+    return (
+      <div className="group/tip relative">
+        <button
+          type="button"
+          aria-label={label}
+          onClick={toggle}
+          className={cn(baseClass, "justify-center py-2")}
+        >
+          <Icon className="size-[18px]" />
+        </button>
+        <span className={sidebarTooltip}>{label}</span>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={toggle}
+      className={cn(baseClass, "gap-2.5 px-3 py-2 text-sm")}
+    >
+      <Icon className="size-[18px] shrink-0" />
+      <span className="whitespace-nowrap">{label}</span>
+    </button>
+  );
+}
+
 const Sidebar = forwardRef<HTMLElement, SidebarProps>(
   (
     {
@@ -203,6 +248,8 @@ const Sidebar = forwardRef<HTMLElement, SidebarProps>(
       title = "Workspace",
       defaultCollapsed = false,
       showSearch = true,
+      darkMode,
+      onDarkModeChange,
       renderLink = defaultRenderLink,
       className,
     },
@@ -290,6 +337,16 @@ const Sidebar = forwardRef<HTMLElement, SidebarProps>(
                   <SidebarNavItem key={item.name} item={item} />
                 ))}
               </ul>
+            </div>
+          )}
+
+          {/* Theme toggle — pinned to the bottom, only when darkMode is provided */}
+          {darkMode !== undefined && (
+            <div className="mt-auto border-t border-gray-200 px-3 py-3 dark:border-gray-800">
+              <ThemeToggle
+                darkMode={darkMode}
+                onDarkModeChange={onDarkModeChange}
+              />
             </div>
           )}
         </aside>
