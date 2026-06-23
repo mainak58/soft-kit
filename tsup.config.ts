@@ -7,6 +7,7 @@ export default defineConfig([
       "components/button/index": "src/components/button/index.ts",
       "components/input/index": "src/components/input/index.ts",
       "components/sidebar/index": "src/components/sidebar/index.ts",
+      "components/dropdown/index": "src/components/dropdown/index.ts",
     },
     format: ["esm", "cjs"],
     dts: true,

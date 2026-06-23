@@ -1,0 +1,26 @@
+/**
+ * Dropdown panel entrance. Tailwind can't express a keyframe animation without
+ * a plugin, so the panel carries the `sk-dropdown` hook class and this rule
+ * animates it in. Reduced-motion users get an instant, static panel.
+ */
+@keyframes sk-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.sk-dropdown {
+  transform-origin: top;
+  animation: sk-dropdown-in 140ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-dropdown {
+    animation: none;
+  }
+}

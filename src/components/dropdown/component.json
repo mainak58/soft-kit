@@ -1,0 +1,6 @@
+{
+  "name": "dropdown",
+  "description": "An accessible select with search, multi-select, and deferred apply/cancel",
+  "registryDependencies": [],
+  "npmDependencies": ["clsx", "tailwind-merge", "lucide-react"]
+}

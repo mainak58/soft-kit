@@ -26,6 +26,11 @@
       "types": "./dist/components/sidebar/index.d.ts",
       "import": "./dist/components/sidebar/index.js",
       "require": "./dist/components/sidebar/index.cjs"
+    },
+    "./dropdown": {
+      "types": "./dist/components/dropdown/index.d.ts",
+      "import": "./dist/components/dropdown/index.js",
+      "require": "./dist/components/dropdown/index.cjs"
     }
   },
   "files": [

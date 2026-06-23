@@ -208,6 +208,400 @@ export const buttonVariants = variants({
     npmDependencies: ["clsx","tailwind-merge"],
     css: null,
   },
+  dropdown: {
+    name: "dropdown",
+    description: "An accessible select with search, multi-select, and deferred apply/cancel",
+    files: [
+      {
+        path: "ui/dropdown.tsx",
+        content: `"use client";
+
+import { forwardRef, useEffect, useRef, useState } from "react";
+import { Check, ChevronDown, Search } from "lucide-react";
+import { cn } from "{{ALIAS}}/lib/cn";
+
+/** A selectable value — strings or numbers both work as unique keys. */
+export type OptionValue = string | number;
+export interface DropdownOption {
+  /** Text shown in the list and (when selected) on the trigger. */
+  label: string;
+  /** Unique identifier passed back through onChange / onApply. */
+  value: OptionValue;
+  /** Render this single option as unselectable. */
+  disabled?: boolean;
+}
+export interface DropdownProps {
+  /** List of selectable items. */
+  options: DropdownOption[];
+  /**
+   * Controlled selection. Pass a single value for single-select, an array for
+   * multi-select. Omit to let the dropdown manage its own state.
+   */
+  value?: OptionValue | OptionValue[];
+  /**
+   * Fires on every change (immediate mode). Receives a single value in
+   * single-select and an array in multi-select. Ignored while \`onApply\` is set.
+   */
+  onChange?: (value: OptionValue | OptionValue[]) => void;
+  /** Text shown when nothing is selected. */
+  placeholder?: string;
+  /** Render the search field inside the panel. When false it is not in the DOM. */
+  showSearch?: boolean;
+  /** Enable multi-select with checkboxes; the panel stays open while picking. */
+  multiSelect?: boolean;
+  /**
+   * When provided, the panel shows Apply / Cancel and defers committing the
+   * selection until Apply is clicked. Cancel (and dismissing the panel) reverts
+   * to the last applied selection.
+   */
+  onApply?: (value: OptionValue | OptionValue[]) => void;
+  /** Disable the whole control. */
+  disabled?: boolean;
+  /**
+   * Extra classes for the root element. Merged with tailwind-merge so a passed
+   * utility overrides the internal one (e.g. \`m-4\` replaces the default \`m-2\`).
+   */
+  className?: string;
+}
+
+/**
+ * Dropdown style fragments — plain Tailwind utilities with dark: variants.
+ * Like the sidebar, the dropdown's states (open / selected / checked) are
+ * simple booleans handled inline with cn() in the component, so there's no
+ * variant/size table to model with variants() here.
+ */
+export const dropdownRoot = [
+  "relative inline-block m-2 min-w-[12rem] text-left align-top font-sans",
+].join(" ");
+export const dropdownTrigger = [
+  "flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm",
+  "border-gray-300 bg-white text-gray-900",
+  "dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100",
+  "cursor-pointer select-none transition-colors duration-200",
+  "hover:bg-gray-50 dark:hover:bg-gray-900",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400",
+  "data-[state=open]:border-blue-500 dark:data-[state=open]:border-blue-400",
+  "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white dark:disabled:hover:bg-gray-950",
+].join(" ");
+export const dropdownPanel = [
+  "absolute left-0 z-50 mt-1.5 w-full overflow-hidden rounded-md border shadow-lg",
+  "border-gray-200 bg-white text-gray-900",
+  "dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100",
+].join(" ");
+export const dropdownSearch = [
+  "flex items-center gap-2 border-b px-3 py-2",
+  "border-gray-200 dark:border-gray-800",
+].join(" ");
+export const dropdownList = "max-h-60 overflow-y-auto p-1";
+export const dropdownOptionBase = [
+  "flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm",
+  "cursor-pointer select-none text-gray-700 dark:text-gray-200",
+  "transition-colors duration-150",
+  "hover:bg-gray-100 dark:hover:bg-gray-800",
+  "focus-visible:outline-none focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800",
+].join(" ");
+export const dropdownCheckbox = [
+  "flex size-4 shrink-0 items-center justify-center rounded border transition-colors duration-150",
+].join(" ");
+export const dropdownEmpty = [
+  "px-3 py-6 text-center text-sm text-gray-400 dark:text-gray-500",
+].join(" ");
+export const dropdownFooter = [
+  "flex items-center justify-end gap-2 border-t px-2 py-2",
+  "border-gray-200 dark:border-gray-800",
+].join(" ");
+const actionBase = [
+  "inline-flex items-center justify-center rounded-md px-3 py-1.5 text-sm font-medium",
+  "cursor-pointer select-none transition-colors duration-200",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400",
+].join(" ");
+export const dropdownCancelBtn = [
+  actionBase,
+  "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800",
+].join(" ");
+export const dropdownApplyBtn = [
+  actionBase,
+  "bg-blue-600 text-white shadow-sm hover:bg-blue-700 active:bg-blue-800",
+  "dark:bg-blue-500 dark:hover:bg-blue-400 dark:active:bg-blue-600",
+].join(" ");
+
+/** Normalize a controlled value (single | array | undefined) to an array. */
+const toArray = (v?: OptionValue | OptionValue[]): OptionValue[] =>
+  v == null ? [] : Array.isArray(v) ? v : [v];
+const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
+  (
+    {
+      options,
+      value,
+      onChange,
+      placeholder = "Select...",
+      showSearch = true,
+      multiSelect = false,
+      onApply,
+      disabled = false,
+      className,
+    },
+    ref
+  ) => {
+    const deferred = typeof onApply === "function";
+    const isControlled = value !== undefined;
+    const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState("");
+    const [internal, setInternal] = useState<OptionValue[]>(() => toArray(value));
+    const [draft, setDraft] = useState<OptionValue[]>(() => toArray(value));
+    // The last-committed selection, and the one the panel currently reflects.
+    const committed = isControlled ? toArray(value) : internal;
+    const selected = deferred ? draft : committed;
+    const rootRef = useRef<HTMLDivElement>(null);
+    const searchRef = useRef<HTMLInputElement>(null);
+    // Latest values for the document listeners, which only bind on open.
+    const stateRef = useRef({ deferred, committed });
+    stateRef.current = { deferred, committed };
+    const setRootRef = (node: HTMLDivElement | null) => {
+      rootRef.current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref) ref.current = node;
+    };
+    // Dismiss on outside mousedown or Escape — staged changes are discarded.
+    useEffect(() => {
+      if (!open) return;
+      const dismiss = () => {
+        const s = stateRef.current;
+        if (s.deferred) setDraft(s.committed);
+        setOpen(false);
+      };
+      const onPointer = (e: MouseEvent) => {
+        if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+          dismiss();
+        }
+      };
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === "Escape") dismiss();
+      };
+      document.addEventListener("mousedown", onPointer);
+      document.addEventListener("keydown", onKey);
+      return () => {
+        document.removeEventListener("mousedown", onPointer);
+        document.removeEventListener("keydown", onKey);
+      };
+    }, [open]);
+    // Auto-focus the search field when the panel opens.
+    useEffect(() => {
+      if (open && showSearch) searchRef.current?.focus();
+    }, [open, showSearch]);
+    const labelFor = (v: OptionValue) =>
+      options.find((o) => o.value === v)?.label ?? String(v);
+    const query = search.trim().toLowerCase();
+    const filtered = query
+      ? options.filter((o) => o.label.toLowerCase().includes(query))
+      : options;
+    const openPanel = () => {
+      setSearch("");
+      setDraft(committed);
+      setOpen(true);
+    };
+    const closePanel = () => {
+      if (deferred) setDraft(committed);
+      setOpen(false);
+    };
+    const commit = (next: OptionValue[]) => {
+      if (!isControlled) setInternal(next);
+      onChange?.(multiSelect ? next : next[0]);
+    };
+    const handleSelect = (opt: DropdownOption) => {
+      if (opt.disabled) return;
+      if (multiSelect) {
+        const exists = selected.some((s) => s === opt.value);
+        const next = exists
+          ? selected.filter((s) => s !== opt.value)
+          : [...selected, opt.value];
+        if (deferred) setDraft(next);
+        else commit(next);
+        // Multi-select keeps the panel open so the user can keep picking.
+      } else {
+        const next = [opt.value];
+        if (deferred) {
+          setDraft(next);
+        } else {
+          commit(next);
+          setOpen(false); // single-select commits and closes immediately
+        }
+      }
+    };
+    const handleApply = () => {
+      if (!isControlled) setInternal(draft);
+      onApply?.(multiSelect ? draft : draft[0]);
+      setOpen(false);
+    };
+    const handleCancel = () => {
+      setDraft(committed);
+      setOpen(false);
+    };
+    // The trigger shows the committed (last-applied) selection.
+    let triggerLabel: string;
+    let isPlaceholder = false;
+    if (committed.length === 0) {
+      triggerLabel = placeholder;
+      isPlaceholder = true;
+    } else if (!multiSelect || committed.length === 1) {
+      triggerLabel = labelFor(committed[0]);
+    } else {
+      triggerLabel = \`\${committed.length} selected\`;
+    }
+    return (
+      <div ref={setRootRef} className={cn(dropdownRoot, className)}>
+        <button
+          type="button"
+          disabled={disabled}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          data-state={open ? "open" : "closed"}
+          onClick={() => (open ? closePanel() : openPanel())}
+          className={dropdownTrigger}
+        >
+          <span
+            className={cn(
+              "truncate",
+              isPlaceholder && "text-gray-400 dark:text-gray-500"
+            )}
+            title={isPlaceholder ? undefined : triggerLabel}
+          >
+            {triggerLabel}
+          </span>
+          <ChevronDown
+            className={cn(
+              "size-4 shrink-0 text-gray-400 transition-transform duration-200",
+              open && "rotate-180"
+            )}
+          />
+        </button>
+        {open && (
+          <div
+            role="listbox"
+            aria-multiselectable={multiSelect}
+            className={cn(dropdownPanel, "sk-dropdown")}
+          >
+            {showSearch && (
+              <div className={dropdownSearch}>
+                <Search className="size-4 shrink-0 text-gray-400" />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search"
+                  aria-label="Search options"
+                  className="w-full bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100"
+                />
+              </div>
+            )}
+            <div className={dropdownList}>
+              {options.length === 0 ? (
+                <p className={dropdownEmpty}>No options</p>
+              ) : filtered.length === 0 ? (
+                <p className={dropdownEmpty}>No results found</p>
+              ) : (
+                filtered.map((opt) => {
+                  const isChecked = selected.some((s) => s === opt.value);
+                  return (
+                    <button
+                      key={String(opt.value)}
+                      type="button"
+                      role="option"
+                      aria-selected={isChecked}
+                      disabled={opt.disabled}
+                      title={opt.label}
+                      onClick={() => handleSelect(opt)}
+                      className={cn(
+                        dropdownOptionBase,
+                        isChecked &&
+                          !multiSelect &&
+                          "bg-blue-50 font-medium text-blue-700 dark:bg-blue-950/40 dark:text-blue-300",
+                        opt.disabled && "pointer-events-none opacity-40"
+                      )}
+                    >
+                      {multiSelect && (
+                        <span
+                          className={cn(
+                            dropdownCheckbox,
+                            isChecked
+                              ? "border-blue-600 bg-blue-600 text-white dark:border-blue-500 dark:bg-blue-500"
+                              : "border-gray-300 dark:border-gray-600"
+                          )}
+                        >
+                          {isChecked && (
+                            <Check className="size-3" strokeWidth={3} />
+                          )}
+                        </span>
+                      )}
+                      <span className="truncate">{opt.label}</span>
+                      {!multiSelect && isChecked && (
+                        <Check className="ml-auto size-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                      )}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+            {deferred && (
+              <div className={dropdownFooter}>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className={dropdownCancelBtn}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApply}
+                  className={dropdownApplyBtn}
+                >
+                  Apply
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+Dropdown.displayName = "Dropdown";
+export { Dropdown };
+`,
+      },
+    ],
+    registryDependencies: [],
+    npmDependencies: ["clsx","tailwind-merge","lucide-react"],
+    css: `/**
+ * Dropdown panel entrance. Tailwind can't express a keyframe animation without
+ * a plugin, so the panel carries the \`sk-dropdown\` hook class and this rule
+ * animates it in. Reduced-motion users get an instant, static panel.
+ */
+@keyframes sk-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.sk-dropdown {
+  transform-origin: top;
+  animation: sk-dropdown-in 140ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-dropdown {
+    animation: none;
+  }
+}
+`,
+  },
   input: {
     name: "input",
     description: "An input with sizes, error state, and start/end adornments",
