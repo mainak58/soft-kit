@@ -1,4 +1,5 @@
 import ButtonDemo from "./button";
+import DropdownDemo from "./dropdown";
 import InputDemo from "./input";
 import SidebarDemo from "./sidebar";
 import type { DemoEntry } from "./types";
@@ -8,6 +9,7 @@ export const demos: DemoEntry[] = [
   { name: "sidebar", label: "Sidebar", Demo: SidebarDemo },
   { name: "button", label: "Button", Demo: ButtonDemo },
   { name: "input", label: "Input", Demo: InputDemo },
+  { name: "dropdown", label: "Dropdown", Demo: DropdownDemo },
 ];
 
 export type { DemoEntry, DemoProps } from "./types";
