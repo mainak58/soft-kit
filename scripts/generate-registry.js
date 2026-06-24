@@ -187,8 +187,42 @@ function buildComponentFile(componentDir, componentName) {
   }
 
   const prefix = useClient ? `"use client";\n\n` : "";
-  const combined = prefix + importLines.join("\n") + "\n\n" + bodyParts.join("\n\n") + "\n";
+  let combined = prefix + importLines.join("\n") + "\n\n" + bodyParts.join("\n\n") + "\n";
+  combined = dedupeReexports(combined);
   return combined;
+}
+
+/**
+ * After merging, a name can be both declared-and-exported (e.g.
+ * `export const buttonVariants = …` from the styles file) AND named again in
+ * the component file's trailing `export { Button, buttonVariants };`. In the
+ * separate source modules that's a valid re-export, but once merged into one
+ * file it's a duplicate export (TS2323 / TS2484). Drop any name from a local
+ * `export { … }` block that the merged file already exports via a declaration;
+ * keep the rest (e.g. the component itself, declared only as a local const).
+ */
+function dedupeReexports(body) {
+  const exportedDecl = new Set();
+  const declRegex =
+    /\bexport\s+(?:const|let|var|function|class|interface|type|enum)\s+([A-Za-z0-9_$]+)/g;
+  let m;
+  while ((m = declRegex.exec(body)) !== null) {
+    exportedDecl.add(m[1]);
+  }
+
+  // Local `export { … };` blocks only — never `export { … } from "…"`.
+  return body.replace(/export\s*\{([^}]*)\}\s*;?(?!\s*from)/g, (full, inner) => {
+    const kept = inner
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .filter((spec) => {
+        // The exported name is whatever follows `as`, else the name itself.
+        const exportedName = spec.split(/\s+as\s+/).pop().trim();
+        return !exportedDecl.has(exportedName);
+      });
+    return kept.length === 0 ? "" : `export { ${kept.join(", ")} };`;
+  });
 }
 
 // ─── Main ───────────────────────────────────────────────
