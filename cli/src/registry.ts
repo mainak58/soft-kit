@@ -208,6 +208,138 @@ export const buttonVariants = variants({
     npmDependencies: ["clsx","tailwind-merge"],
     css: null,
   },
+  checkbox: {
+    name: "checkbox",
+    description: "A checkbox with optional label, sizes, and error state",
+    files: [
+      {
+        path: "ui/checkbox.tsx",
+        content: `import { type ComponentPropsWithRef, type ReactNode, forwardRef } from "react";
+import { variants } from "{{ALIAS}}/lib/variants";
+import { cn } from "{{ALIAS}}/lib/cn";
+
+export interface CheckboxProps
+  extends Omit<ComponentPropsWithRef<"input">, "size" | "type"> {
+  /** Optional label rendered next to the checkbox */
+  label?: ReactNode;
+  /** Size preset */
+  size?: "sm" | "md" | "lg";
+  /** Show error styling */
+  error?: boolean;
+}
+
+/**
+ * ============================================
+ * Checkbox Style Adapter
+ * ============================================
+ * The ONLY file that knows about Tailwind classes.
+ * Colors are plain Tailwind utilities (with dark: variants
+ * for dark mode) — no external CSS or design-token file needed.
+ *
+ * The checked fill uses \`accent-color\`, so the box renders
+ * natively and stays consistent across browsers.
+ * ============================================
+ */
+export const checkboxVariants = variants({
+  base: [
+    "shrink-0 cursor-pointer rounded border bg-white",
+    "border-gray-300 accent-blue-600",
+    "transition-colors duration-200 ease-in-out",
+    /* Focus ring */
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+    "focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400",
+    /* Disabled */
+    "disabled:cursor-not-allowed disabled:opacity-50",
+    /* Dark mode */
+    "dark:border-gray-700 dark:bg-gray-900 dark:accent-blue-500",
+  ].join(" "),
+  variants: {
+    size: {
+      sm: "h-3.5 w-3.5",
+      md: "h-4 w-4",
+      lg: "h-5 w-5",
+    },
+    error: {
+      true: "border-red-500 dark:border-red-500",
+      false: "",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+    error: "false",
+  },
+});
+export const checkboxLabelVariants = variants({
+  base: "select-none text-gray-900 dark:text-gray-100",
+  variants: {
+    size: {
+      sm: "text-xs",
+      md: "text-sm",
+      lg: "text-base",
+    },
+    disabled: {
+      true: "cursor-not-allowed opacity-50",
+      false: "cursor-pointer",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+    disabled: "false",
+  },
+});
+
+/**
+ * ============================================
+ * Checkbox Component
+ * ============================================
+ * A framework-agnostic checkbox. With a \`label\` it renders an
+ * inline <label> wrapper so the text is clickable; without one
+ * it renders the bare <input> (drop it inside a <Field>, etc.).
+ *
+ * Zero Tailwind knowledge — all styling comes from
+ * checkbox.styles.ts (the adapter).
+ * ============================================
+ */
+const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
+  ({ className, label, size, error = false, disabled, ...props }, ref) => {
+    const input = (
+      <input
+        ref={ref}
+        type="checkbox"
+        disabled={disabled}
+        aria-invalid={error || undefined}
+        className={cn(
+          checkboxVariants({ size, error: error ? "true" : "false" }),
+          className
+        )}
+        {...props}
+      />
+    );
+    if (!label) return input;
+    return (
+      <label className="inline-flex items-center gap-2">
+        {input}
+        <span
+          className={checkboxLabelVariants({
+            size,
+            disabled: disabled ? "true" : "false",
+          })}
+        >
+          {label}
+        </span>
+      </label>
+    );
+  }
+);
+Checkbox.displayName = "Checkbox";
+export { Checkbox, checkboxVariants };
+`,
+      },
+    ],
+    registryDependencies: [],
+    npmDependencies: ["clsx","tailwind-merge"],
+    css: null,
+  },
   dropdown: {
     name: "dropdown",
     description: "An accessible select with search, multi-select, and deferred apply/cancel",
@@ -601,6 +733,144 @@ export { Dropdown };
   }
 }
 `,
+  },
+  field: {
+    name: "field",
+    description: "Form field wrapper with label, required marker, hint and error text",
+    files: [
+      {
+        path: "ui/field.tsx",
+        content: `import { type ComponentPropsWithRef, type ReactNode, forwardRef } from "react";
+import { variants } from "{{ALIAS}}/lib/variants";
+import { cn } from "{{ALIAS}}/lib/cn";
+
+export interface FieldProps extends ComponentPropsWithRef<"div"> {
+  /** The field label */
+  label?: ReactNode;
+  /** id of the control this label points to (renders <label for=…>) */
+  htmlFor?: string;
+  /** Marks the field as required (renders a red asterisk after the label) */
+  required?: boolean;
+  /** Helper text shown beneath the control */
+  hint?: ReactNode;
+  /** Error message shown beneath the control (takes the place of hint) */
+  error?: ReactNode;
+  /** Size preset controlling label + helper text sizing */
+  size?: "sm" | "md" | "lg";
+}
+
+/**
+ * ============================================
+ * Field Style Adapter
+ * ============================================
+ * The ONLY file that knows about Tailwind classes.
+ * Colors are plain Tailwind utilities (with dark: variants
+ * for dark mode) — no external CSS or design-token file needed.
+ * ============================================
+ */
+export const fieldVariants = variants({
+  base: "flex w-full flex-col gap-1.5",
+  variants: {
+    size: {
+      sm: "gap-1",
+      md: "gap-1.5",
+      lg: "gap-2",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+});
+export const fieldLabelVariants = variants({
+  base: "font-medium text-gray-900 dark:text-gray-100",
+  variants: {
+    size: {
+      sm: "text-xs",
+      md: "text-sm",
+      lg: "text-base",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+});
+export const fieldHintVariants = variants({
+  base: "text-gray-500 dark:text-gray-400",
+  variants: {
+    size: {
+      sm: "text-[0.6875rem]",
+      md: "text-xs",
+      lg: "text-sm",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+});
+export const fieldErrorVariants = variants({
+  base: "font-medium text-red-600 dark:text-red-400",
+  variants: {
+    size: {
+      sm: "text-[0.6875rem]",
+      md: "text-xs",
+      lg: "text-sm",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+});
+export const fieldRequiredStyles = "ml-0.5 text-red-600 dark:text-red-400";
+
+/**
+ * ============================================
+ * Field Component
+ * ============================================
+ * A framework-agnostic form-field wrapper: an optional label
+ * (with a required marker), the control you pass as children,
+ * and an optional hint / error line beneath it.
+ *
+ * Zero Tailwind knowledge — all styling comes from
+ * field.styles.ts (the adapter).
+ * ============================================
+ */
+const Field = forwardRef<HTMLDivElement, FieldProps>(
+  (
+    { className, label, htmlFor, required, hint, error, size, children, ...props },
+    ref
+  ) => {
+    return (
+      <div ref={ref} className={cn(fieldVariants({ size }), className)} {...props}>
+        {label && (
+          <label htmlFor={htmlFor} className={fieldLabelVariants({ size })}>
+            {label}
+            {required && (
+              <span className={fieldRequiredStyles} aria-hidden="true">
+                *
+              </span>
+            )}
+          </label>
+        )}
+        {children}
+        {error ? (
+          <span role="alert" className={fieldErrorVariants({ size })}>
+            {error}
+          </span>
+        ) : hint ? (
+          <span className={fieldHintVariants({ size })}>{hint}</span>
+        ) : null}
+      </div>
+    );
+  }
+);
+Field.displayName = "Field";
+export { Field, fieldVariants };
+`,
+      },
+    ],
+    registryDependencies: [],
+    npmDependencies: ["clsx","tailwind-merge"],
+    css: null,
   },
   input: {
     name: "input",

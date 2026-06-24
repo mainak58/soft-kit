@@ -31,6 +31,16 @@
       "types": "./dist/components/dropdown/index.d.ts",
       "import": "./dist/components/dropdown/index.js",
       "require": "./dist/components/dropdown/index.cjs"
+    },
+    "./field": {
+      "types": "./dist/components/field/index.d.ts",
+      "import": "./dist/components/field/index.js",
+      "require": "./dist/components/field/index.cjs"
+    },
+    "./checkbox": {
+      "types": "./dist/components/checkbox/index.d.ts",
+      "import": "./dist/components/checkbox/index.js",
+      "require": "./dist/components/checkbox/index.cjs"
     }
   },
   "files": [

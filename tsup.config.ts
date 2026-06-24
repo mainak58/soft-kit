@@ -8,6 +8,8 @@ export default defineConfig([
       "components/input/index": "src/components/input/index.ts",
       "components/sidebar/index": "src/components/sidebar/index.ts",
       "components/dropdown/index": "src/components/dropdown/index.ts",
+      "components/field/index": "src/components/field/index.ts",
+      "components/checkbox/index": "src/components/checkbox/index.ts",
     },
     format: ["esm", "cjs"],
     dts: true,

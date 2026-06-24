@@ -1,0 +1,6 @@
+{
+  "name": "field",
+  "description": "Form field wrapper with label, required marker, hint and error text",
+  "registryDependencies": [],
+  "npmDependencies": ["clsx", "tailwind-merge"]
+}

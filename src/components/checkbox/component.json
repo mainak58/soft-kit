@@ -1,0 +1,6 @@
+{
+  "name": "checkbox",
+  "description": "A checkbox with optional label, sizes, and error state",
+  "registryDependencies": [],
+  "npmDependencies": ["clsx", "tailwind-merge"]
+}
