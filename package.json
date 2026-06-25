@@ -41,6 +41,11 @@
       "types": "./dist/components/checkbox/index.d.ts",
       "import": "./dist/components/checkbox/index.js",
       "require": "./dist/components/checkbox/index.cjs"
+    },
+    "./tab-switcher": {
+      "types": "./dist/components/tab-switcher/index.d.ts",
+      "import": "./dist/components/tab-switcher/index.js",
+      "require": "./dist/components/tab-switcher/index.cjs"
     }
   },
   "files": [

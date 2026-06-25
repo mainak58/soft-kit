@@ -1,0 +1,24 @@
+/* TabSwitcher — panel enter animation.
+   Tailwind can't key off React's remount, so the active panel carries the
+   `sk-tab-panel` class and this keyframe plays each time the tab changes. */
+
+@keyframes sk-tab-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sk-tab-panel {
+  animation: sk-tab-fade-in 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-tab-panel {
+    animation: none;
+  }
+}

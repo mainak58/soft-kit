@@ -1,0 +1,6 @@
+{
+  "name": "tab-switcher",
+  "description": "Accessible tabs with controlled/uncontrolled modes, keyboard nav, and an animated indicator",
+  "registryDependencies": [],
+  "npmDependencies": ["clsx", "tailwind-merge"]
+}

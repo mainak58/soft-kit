@@ -61,13 +61,19 @@ npx soft-kit update all        # update every installed soft-kit component
 npx soft-kit list
 ```
 
-## Available components
+## Components
 
-| Component | Description |
-|-----------|-------------|
-| `button`  | Variants, sizes, and a loading state |
-| `input`   | Sizes, error state, start/end adornments |
-| `sidebar` | Collapsible nav with nested groups, badges, and tooltips |
+Each component has its own reference page with props, examples, and notes:
+
+| Component | Description | Docs |
+|-----------|-------------|------|
+| Button | Variants, sizes, and a loading state | [How to use →](docs/button.md) |
+| Input | Sizes, error state, start/end adornments | [How to use →](docs/input.md) |
+| Checkbox | Optional label, sizes, error state | [How to use →](docs/checkbox.md) |
+| Field | Label + required marker + hint/error wrapper | [How to use →](docs/field.md) |
+| Dropdown | Searchable select, multi-select, apply/cancel | [How to use →](docs/dropdown.md) |
+| Sidebar | Collapsible nav with nested groups, badges, tooltips | [How to use →](docs/sidebar.md) |
+| TabSwitcher | Accessible tabs, keyboard nav, animated indicator | [How to use →](docs/tab-switcher.md) |
 
 Dark mode works out of the box via Tailwind `dark:` variants — toggle with a `.dark`
 class (or `data-theme="dark"`) on a parent element.

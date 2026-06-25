@@ -10,6 +10,7 @@ export default defineConfig([
       "components/dropdown/index": "src/components/dropdown/index.ts",
       "components/field/index": "src/components/field/index.ts",
       "components/checkbox/index": "src/components/checkbox/index.ts",
+      "components/tab-switcher/index": "src/components/tab-switcher/index.ts",
     },
     format: ["esm", "cjs"],
     dts: true,

@@ -280,7 +280,11 @@ program
       if (!comp) continue;
       const firstFile = comp.files[0];
       const importPath = `${aliasBase}/${firstFile.path.replace(/\.tsx?$/, "")}`;
-      const exportName = name.charAt(0).toUpperCase() + name.slice(1);
+      // kebab/snake-case → PascalCase, e.g. "tab-switcher" → "TabSwitcher"
+      const exportName = name
+        .split(/[-_]/)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join("");
       console.log(pc.cyan(`  import { ${exportName} } from "${importPath}";`));
     }
   });

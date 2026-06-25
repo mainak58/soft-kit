@@ -304,7 +304,7 @@ export const REGISTRY: Record<string, RegistryComponent> = {
 `;
 
   for (const comp of components) {
-    output += `  ${comp.name}: {
+    output += `  "${comp.name}": {
     name: "${comp.name}",
     description: "${comp.description}",
     files: [

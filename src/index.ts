@@ -8,6 +8,9 @@ export type { InputProps } from "./components/input";
 export { Sidebar, useSidebar } from "./components/sidebar";
 export type { SidebarProps, SidebarItem } from "./components/sidebar";
 
+export { TabSwitcher } from "./components/tab-switcher";
+export type { TabSwitcherProps, TabItem } from "./components/tab-switcher";
+
 export { Dropdown } from "./components/dropdown";
 export type { DropdownProps, DropdownOption, OptionValue } from "./components/dropdown";
 

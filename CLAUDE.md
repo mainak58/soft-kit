@@ -116,14 +116,19 @@ When asked to create component `<name>`:
    "components/<name>/index": "src/components/<name>/index.ts",
    ```
 4. Add the subpath export in [`package.json`](package.json) `exports` (mirror `./button`).
-5. Regenerate the registry: `node scripts/generate-registry.js`
+5. **Write the docs page** `docs/<name>.md` (props table + usage examples + notes on
+   any CSS/deps) and add a link to it from the **Components** section of the root
+   [`README.md`](README.md) — e.g. `- [TabSwitcher](docs/tab-switcher.md) — short hook`.
+   Keep the README a short index; the full usage lives in `docs/<name>.md`.
+   **When updating an existing component, update its `docs/<name>.md` too.**
+6. Regenerate the registry: `node scripts/generate-registry.js`
    (the new component must appear in the output list).
-6. Build + verify the CLI:
+7. Build + verify the CLI:
    ```bash
    cd cli && npm run build
    node dist/index.js add <name>   # in a throwaway dir, after init, to sanity-check
    ```
-7. Typecheck the library: `npm run typecheck` (from root).
+8. Typecheck the library: `npm run typecheck` (from root).
 
 ## CLI commands (what the published `soft-kit` tool does for users)
 
