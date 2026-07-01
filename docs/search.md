@@ -61,7 +61,8 @@ const [q, setQ] = useState("");
 | `fetcher` | `SearchFetcher<T>` | — | **Required.** `(query, signal) => Promise<T[]>` — where the API call happens. |
 | `debounce` | `number` | `300` | Delay (ms) after typing stops before the fetcher fires. |
 | `cancelPrevious` | `boolean` | `true` | Abort the previous in-flight request when a newer query starts. |
-| `minChars` | `number` | `1` | Minimum characters before the fetcher runs. |
+| `min` | `number` | `0` | Minimum characters before the fetcher runs; below it a "type at least N characters" hint shows and the panel is hidden. |
+| `max` | `number \| "infinite"` | `50` | Maximum characters allowed. Extra input is blocked and a "more than N is not allowed" hint shows at the limit. `"infinite"` disables the cap. |
 | `initialQuery` | `string` | `""` | Seed the input (uncontrolled). |
 | `value` | `string` | — | Controlled query value (pair with `onQueryChange`). |
 | `onQueryChange` | `(value: string) => void` | — | Notified on every query change. |
@@ -96,3 +97,6 @@ this one.
   when `cancelPrevious` is off.
 - Accessible by default: the panel is a `listbox` with `option` rows, and the spinners
   honour `prefers-reduced-motion` (`motion-reduce:animate-none`).
+- `min`/`max` bound the query length. `min` gates the fetcher (with a hint below it);
+  `max` caps typing/paste via the native `maxLength` and shows a warning at the ceiling.
+  Set `max="infinite"` for no upper bound.

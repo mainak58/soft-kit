@@ -35,8 +35,18 @@ export interface SearchProps<T> {
    * request (e.g. "se" -> "sea" cancels the "se" request). Default: true.
    */
   cancelPrevious?: boolean;
-  /** Minimum characters before the fetcher runs. Default: 1. */
-  minChars?: number;
+  /**
+   * Minimum characters before the fetcher runs. Below this, the panel is
+   * suppressed and a "type at least N characters" hint is shown instead.
+   * Default: 0.
+   */
+  min?: number;
+  /**
+   * Maximum characters allowed in the input. Extra characters are blocked and
+   * a "more than N is not allowed" hint is shown at the limit. Pass
+   * `"infinite"` (or `Infinity`) for no cap. Default: 50.
+   */
+  max?: number | "infinite";
   /** Seed the input with an initial query. */
   initialQuery?: string;
   /** Called after a successful fetch, with the results and the query used. */

@@ -74,12 +74,12 @@ export default function SearchDemo() {
 
       <section>
         <h2 className="mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">
-          Controlled query · custom row · minChars=2
+          Controlled query · custom row · min=2
         </h2>
         <Search<string>
           value={query}
           onQueryChange={setQuery}
-          minChars={2}
+          min={2}
           debounce={400}
           fetcher={searchFruits}
           renderItem={(f) => (
@@ -93,6 +93,34 @@ export default function SearchDemo() {
         <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
           Query: {query || "(empty)"}
         </p>
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+          Length bounds · min=3, max=10
+        </h2>
+        <Search<string>
+          min={3}
+          max={10}
+          fetcher={searchFruits}
+          placeholder="3–10 characters"
+          onSelect={setPicked}
+        />
+        <p className="mt-2 text-xs text-gray-400 dark:text-gray-500">
+          Type 1–2 chars for the min hint; hit 10 chars for the max warning.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+          No upper bound · max="infinite"
+        </h2>
+        <Search<string>
+          max="infinite"
+          fetcher={searchFruits}
+          placeholder="Type as much as you like"
+          onSelect={setPicked}
+        />
       </section>
 
       <section>

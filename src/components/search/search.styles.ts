@@ -53,6 +53,14 @@ export const searchErrorRow = [
   "px-3 py-6 text-center text-sm text-red-600 dark:text-red-400",
 ].join(" ");
 
+export const searchHint = [
+  "mt-1.5 px-1 text-xs text-gray-400 dark:text-gray-500",
+].join(" ");
+
+export const searchHintError = [
+  "mt-1.5 px-1 text-xs text-red-600 dark:text-red-400",
+].join(" ");
+
 export const searchOption = [
   "flex w-full items-center rounded-md px-2.5 py-2 text-left text-sm",
   "text-gray-700 transition-colors dark:text-gray-200",

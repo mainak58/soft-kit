@@ -8,6 +8,8 @@ import {
   searchEmptyRow,
   searchErrorRow,
   searchField,
+  searchHint,
+  searchHintError,
   searchLeadingIcon,
   searchLoadingRow,
   searchOption,
@@ -35,7 +37,8 @@ function Search<T>({
   fetcher,
   debounce = 300,
   cancelPrevious = true,
-  minChars = 1,
+  min = 0,
+  max = 50,
   initialQuery = "",
   onSuccess,
   onError,
@@ -61,6 +64,10 @@ function Search<T>({
 
   // `value` (if provided) makes the input controlled; otherwise state owns it.
   const query = value ?? internalQuery;
+
+  // Resolve the upper bound: "infinite" (or Infinity) means no cap.
+  const maxLimit = max === "infinite" ? Infinity : max;
+  const hasMax = Number.isFinite(maxLimit);
 
   // Hold the latest fetcher/callbacks in refs so run()'s identity is stable and
   // the debounce effect doesn't re-fire just because a parent re-rendered.
@@ -89,7 +96,8 @@ function Search<T>({
         controllerRef.current?.abort();
       }
 
-      if (q.length < minChars) {
+      // Below `min` (or empty) never fires — stay idle so the hint can show.
+      if (q.length === 0 || q.length < min) {
         controllerRef.current = null;
         setResults([]);
         setError(null);
@@ -125,7 +133,7 @@ function Search<T>({
           onErrorRef.current?.(err);
         });
     },
-    [cancelPrevious, minChars]
+    [cancelPrevious, min]
   );
 
   // Debounce: fire the search `debounce` ms after the query last changed.
@@ -138,8 +146,10 @@ function Search<T>({
   useEffect(() => () => controllerRef.current?.abort(), []);
 
   const handleChange = (next: string) => {
-    if (value === undefined) setInternalQuery(next);
-    onQueryChange?.(next);
+    // Enforce `max` even against pasted / programmatic values.
+    const capped = hasMax ? next.slice(0, maxLimit) : next;
+    if (value === undefined) setInternalQuery(capped);
+    onQueryChange?.(capped);
   };
   const handleClear = () => {
     controllerRef.current?.abort();
@@ -151,7 +161,10 @@ function Search<T>({
     onQueryChange?.("");
   };
 
-  const showPanel = query.trim().length >= minChars && status !== "idle";
+  const trimmed = query.trim();
+  const belowMin = trimmed.length > 0 && trimmed.length < min;
+  const atMax = hasMax && query.length >= maxLimit;
+  const showPanel = trimmed.length > 0 && trimmed.length >= min && status !== "idle";
 
   return (
     <div className={cn(searchRoot, className)}>
@@ -164,6 +177,7 @@ function Search<T>({
           autoFocus={autoFocus}
           disabled={disabled}
           placeholder={placeholder}
+          maxLength={hasMax ? maxLimit : undefined}
           onChange={(e) => handleChange(e.target.value)}
           className={cn(searchField, inputClassName)}
         />
@@ -183,6 +197,19 @@ function Search<T>({
           )
         )}
       </div>
+
+      {/* Constraint hints: below-minimum, and the max-reached ceiling. */}
+      {belowMin && (
+        <p className={searchHint}>
+          Type at least {min} character{min === 1 ? "" : "s"} to search.
+        </p>
+      )}
+      {atMax && (
+        <p className={searchHintError}>
+          More than {maxLimit} character{maxLimit === 1 ? "" : "s"} is not
+          allowed.
+        </p>
+      )}
 
       {showPanel && (
         <div role="listbox" className={cn(searchPanel, panelClassName)}>
