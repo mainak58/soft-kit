@@ -5,6 +5,10 @@ import SidebarDemo from "./sidebar";
 import ButtonDemo from "./button";
 import InputDemo from "./input";
 import DropdownDemo from "./dropdown";
+import CheckboxDemo from "./checkbox";
+import FieldDemo from "./field";
+import SearchDemo from "./search";
+import TabSwitcherDemo from "./tab-switcher";
 import type { DemoEntry } from "./types";
 
 // Each component under src/components is registered here for the gallery list.
@@ -13,6 +17,10 @@ export const demos: DemoEntry[] = [
   { name: "button", label: "Button", Demo: ButtonDemo },
   { name: "input", label: "Input", Demo: InputDemo },
   { name: "dropdown", label: "Dropdown", Demo: DropdownDemo },
+  { name: "checkbox", label: "Checkbox", Demo: CheckboxDemo },
+  { name: "field", label: "Field", Demo: FieldDemo },
+  { name: "search", label: "Search", Demo: SearchDemo },
+  { name: "tab-switcher", label: "Tab Switcher", Demo: TabSwitcherDemo },
 ];
 
 export type { DemoEntry, DemoProps } from "./types";

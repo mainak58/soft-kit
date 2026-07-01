@@ -46,6 +46,11 @@
       "types": "./dist/components/tab-switcher/index.d.ts",
       "import": "./dist/components/tab-switcher/index.js",
       "require": "./dist/components/tab-switcher/index.cjs"
+    },
+    "./search": {
+      "types": "./dist/components/search/index.d.ts",
+      "import": "./dist/components/search/index.js",
+      "require": "./dist/components/search/index.cjs"
     }
   },
   "files": [

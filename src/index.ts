@@ -20,6 +20,9 @@ export type { FieldProps } from "./components/field";
 export { Checkbox, checkboxVariants } from "./components/checkbox";
 export type { CheckboxProps } from "./components/checkbox";
 
+export { Search } from "./components/search";
+export type { SearchProps, SearchFetcher, SearchStatus } from "./components/search";
+
 /* Utilities */
 export { cn } from "./lib/cn";
 export { variants } from "./lib/variants";

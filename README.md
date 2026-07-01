@@ -74,6 +74,7 @@ Each component has its own reference page with props, examples, and notes:
 | Dropdown | Searchable select, multi-select, apply/cancel | [How to use →](docs/dropdown.md) |
 | Sidebar | Collapsible nav with nested groups, badges, tooltips | [How to use →](docs/sidebar.md) |
 | TabSwitcher | Accessible tabs, keyboard nav, animated indicator | [How to use →](docs/tab-switcher.md) |
+| Search | Generic async search box, debounce, request cancellation | [How to use →](docs/search.md) |
 
 Dark mode works out of the box via Tailwind `dark:` variants — toggle with a `.dark`
 class (or `data-theme="dark"`) on a parent element.

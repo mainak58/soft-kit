@@ -11,6 +11,7 @@ export default defineConfig([
       "components/field/index": "src/components/field/index.ts",
       "components/checkbox/index": "src/components/checkbox/index.ts",
       "components/tab-switcher/index": "src/components/tab-switcher/index.ts",
+      "components/search/index": "src/components/search/index.ts",
     },
     format: ["esm", "cjs"],
     dts: true,

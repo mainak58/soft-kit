@@ -975,6 +975,339 @@ export const adornmentStyles = [
 }
 `,
   },
+  "search": {
+    name: "search",
+    description: "Generic async search box with debounce and request cancellation",
+    files: [
+      {
+        path: "ui/search.tsx",
+        content: `"use client";
+
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { Loader2, Search as SearchIcon, X } from "lucide-react";
+import { cn } from "{{ALIAS}}/lib/cn";
+
+/* -------------------------------------------------------------------------- */
+/* Types — exported so you can reuse them anywhere:                            */
+/*   import { Search } from "@/components/ui/search";                          */
+/*   import type { SearchFetcher, SearchProps } from "@/components/ui/search"; */
+/* -------------------------------------------------------------------------- */
+/** Lifecycle of an async search request. */
+export type SearchStatus = "idle" | "loading" | "success" | "empty" | "error";
+/**
+ * The async data source a consumer plugs in — this is where you call your API.
+ *
+ * - \`query\`  : the already-trimmed, debounced search term.
+ * - \`signal\` : an AbortSignal that fires when a newer request supersedes this
+ *              one (see \`cancelPrevious\`). Forward it into axios (\`{ signal }\`)
+ *              or fetch so the in-flight request is actually cancelled.
+ */
+export type SearchFetcher<T> = (
+  query: string,
+  signal: AbortSignal
+) => Promise<T[]>;
+export interface SearchProps<T> {
+  /** Where the API call happens. Receives (query, abortSignal). */
+  fetcher: SearchFetcher<T>;
+  /**
+   * PROP 1 — debounce delay in ms. The fetcher only fires once typing has
+   * paused for this long. Default: 300.
+   */
+  debounce?: number;
+  /**
+   * PROP 2 — when true, typing a new query aborts the previous in-flight
+   * request (e.g. "se" -> "sea" cancels the "se" request). Default: true.
+   */
+  cancelPrevious?: boolean;
+  /** Minimum characters before the fetcher runs. Default: 1. */
+  minChars?: number;
+  /** Seed the input with an initial query. */
+  initialQuery?: string;
+  /** Called after a successful fetch, with the results and the query used. */
+  onSuccess?: (results: T[], query: string) => void;
+  /** Called on a real (non-abort) error. */
+  onError?: (error: unknown) => void;
+  /** Placeholder for the input. */
+  placeholder?: string;
+  /** Stable React key for a result row. Defaults to the array index. */
+  getKey?: (item: T, index: number) => string | number;
+  /** Render one result row. Defaults to String(item). */
+  renderItem?: (item: T) => ReactNode;
+  /** Fires when a result row is chosen (click). */
+  onSelect?: (item: T) => void;
+  /** Custom node when there are no matches. */
+  renderEmpty?: (query: string) => ReactNode;
+  /** Custom loading node. */
+  renderLoading?: () => ReactNode;
+  /** Custom error node. */
+  renderError?: (error: string) => ReactNode;
+  /** Controlled query value. Omit for uncontrolled use. */
+  value?: string;
+  /** Notified on every query change (pairs with \`value\` for controlled use). */
+  onQueryChange?: (value: string) => void;
+  /** Focus the input on mount. */
+  autoFocus?: boolean;
+  /** Disable the input. */
+  disabled?: boolean;
+  /** Extra classes for the root wrapper. */
+  className?: string;
+  /** Extra classes for the <input>. */
+  inputClassName?: string;
+  /** Extra classes for the results panel. */
+  panelClassName?: string;
+}
+
+/**
+ * Search style fragments — plain Tailwind utilities with dark: variants.
+ * Like the sidebar and dropdown, the search box has no variant/size table:
+ * its states (loading / empty / error / success) are simple and handled
+ * inline with cn() in the component, so there's nothing to model with
+ * variants() here — just composable class-name constants.
+ */
+export const searchRoot = "relative w-full font-sans";
+export const searchField = [
+  "h-10 w-full rounded-lg border pr-8 pl-8 text-sm",
+  "border-gray-300 bg-white text-gray-900",
+  "dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100",
+  "outline-none transition-colors duration-200",
+  "placeholder:text-gray-400 dark:placeholder:text-gray-500",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400",
+  "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+].join(" ");
+export const searchLeadingIcon = [
+  "pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2",
+  "text-gray-400 dark:text-gray-500",
+].join(" ");
+export const searchSpinner = [
+  "absolute top-1/2 right-2.5 size-4 -translate-y-1/2 animate-spin motion-reduce:animate-none",
+  "text-gray-400 dark:text-gray-500",
+].join(" ");
+export const searchClearBtn = [
+  "absolute top-1/2 right-2 -translate-y-1/2 rounded-md p-0.5",
+  "text-gray-400 transition-colors dark:text-gray-500",
+  "hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+].join(" ");
+export const searchPanel = [
+  "absolute z-50 mt-1.5 max-h-72 w-full overflow-y-auto rounded-lg border p-1 shadow-lg",
+  "border-gray-200 bg-white text-gray-900",
+  "dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100",
+].join(" ");
+export const searchLoadingRow = [
+  "flex items-center justify-center gap-2 px-3 py-6 text-sm",
+  "text-gray-400 dark:text-gray-500",
+].join(" ");
+export const searchEmptyRow = [
+  "px-3 py-6 text-center text-sm text-gray-400 dark:text-gray-500",
+].join(" ");
+export const searchErrorRow = [
+  "px-3 py-6 text-center text-sm text-red-600 dark:text-red-400",
+].join(" ");
+export const searchOption = [
+  "flex w-full items-center rounded-md px-2.5 py-2 text-left text-sm",
+  "text-gray-700 transition-colors dark:text-gray-200",
+  "hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+  "focus-visible:bg-gray-100 focus-visible:outline-none dark:focus-visible:bg-gray-800",
+].join(" ");
+
+/**
+ * A generic, reusable search box. You supply the API call via \`fetcher\`; the
+ * component debounces input, cancels superseded requests, and renders the
+ * results in a dropdown. It is generic over the result type \`T\`, so pass
+ * \`renderItem\` / \`onSelect\` typed to your own shape.
+ *
+ *   <Search<Customer>
+ *     debounce={400}
+ *     cancelPrevious
+ *     fetcher={searchCustomers}
+ *     renderItem={(c) => c.name}
+ *     onSelect={setCustomer}
+ *   />
+ */
+function Search<T>({
+  fetcher,
+  debounce = 300,
+  cancelPrevious = true,
+  minChars = 1,
+  initialQuery = "",
+  onSuccess,
+  onError,
+  placeholder = "Search…",
+  getKey,
+  renderItem,
+  onSelect,
+  renderEmpty,
+  renderLoading,
+  renderError,
+  value,
+  onQueryChange,
+  autoFocus,
+  disabled,
+  className,
+  inputClassName,
+  panelClassName,
+}: SearchProps<T>) {
+  const [internalQuery, setInternalQuery] = useState(value ?? initialQuery);
+  const [results, setResults] = useState<T[]>([]);
+  const [status, setStatus] = useState<SearchStatus>("idle");
+  const [error, setError] = useState<string | null>(null);
+  // \`value\` (if provided) makes the input controlled; otherwise state owns it.
+  const query = value ?? internalQuery;
+  // Hold the latest fetcher/callbacks in refs so run()'s identity is stable and
+  // the debounce effect doesn't re-fire just because a parent re-rendered.
+  const fetcherRef = useRef(fetcher);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  });
+  // The controller for the request in flight, so a newer query can abort it.
+  // A monotonic run id additionally discards an older request that resolves
+  // *after* a newer one (even when cancelPrevious is off).
+  const controllerRef = useRef<AbortController | null>(null);
+  const runIdRef = useRef(0);
+  const run = useCallback(
+    (raw: string) => {
+      const q = raw.trim();
+      const runId = ++runIdRef.current;
+      // Abort whatever was in flight before starting the next request.
+      if (cancelPrevious) {
+        controllerRef.current?.abort();
+      }
+      if (q.length < minChars) {
+        controllerRef.current = null;
+        setResults([]);
+        setError(null);
+        setStatus("idle");
+        return;
+      }
+      const controller = new AbortController();
+      controllerRef.current = controller;
+      setStatus("loading");
+      setError(null);
+      fetcherRef
+        .current(q, controller.signal)
+        .then((data) => {
+          if (runId !== runIdRef.current) return; // superseded by a newer query
+          const list = data ?? [];
+          setResults(list);
+          setStatus(list.length ? "success" : "empty");
+          onSuccessRef.current?.(list, q);
+        })
+        .catch((err) => {
+          // Aborts are intentional — never surface them as errors.
+          if (controller.signal.aborted) return;
+          if (runId !== runIdRef.current) return;
+          const message =
+            err instanceof Error
+              ? err.message
+              : "Couldn't load results. Check your connection and try again.";
+          setResults([]);
+          setError(message);
+          setStatus("error");
+          onErrorRef.current?.(err);
+        });
+    },
+    [cancelPrevious, minChars]
+  );
+  // Debounce: fire the search \`debounce\` ms after the query last changed.
+  useEffect(() => {
+    const id = setTimeout(() => run(query), debounce);
+    return () => clearTimeout(id);
+  }, [query, debounce, run]);
+  // Abort any straggler request on unmount.
+  useEffect(() => () => controllerRef.current?.abort(), []);
+  const handleChange = (next: string) => {
+    if (value === undefined) setInternalQuery(next);
+    onQueryChange?.(next);
+  };
+  const handleClear = () => {
+    controllerRef.current?.abort();
+    runIdRef.current += 1;
+    if (value === undefined) setInternalQuery("");
+    setResults([]);
+    setError(null);
+    setStatus("idle");
+    onQueryChange?.("");
+  };
+  const showPanel = query.trim().length >= minChars && status !== "idle";
+  return (
+    <div className={cn(searchRoot, className)}>
+      <div className="relative">
+        <SearchIcon className={searchLeadingIcon} />
+        <input
+          type="text"
+          role="searchbox"
+          value={query}
+          autoFocus={autoFocus}
+          disabled={disabled}
+          placeholder={placeholder}
+          onChange={(e) => handleChange(e.target.value)}
+          className={cn(searchField, inputClassName)}
+        />
+        {/* Trailing affordance: spinner while loading, clear button otherwise. */}
+        {status === "loading" ? (
+          <Loader2 className={searchSpinner} />
+        ) : (
+          query.length > 0 && (
+            <button
+              type="button"
+              aria-label="Clear search"
+              onClick={handleClear}
+              className={searchClearBtn}
+            >
+              <X className="size-4" />
+            </button>
+          )
+        )}
+      </div>
+      {showPanel && (
+        <div role="listbox" className={cn(searchPanel, panelClassName)}>
+          {status === "loading" &&
+            (renderLoading?.() ?? (
+              <div className={searchLoadingRow}>
+                <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
+                Searching…
+              </div>
+            ))}
+          {status === "error" &&
+            (renderError?.(error ?? "Couldn't load results. Try again.") ?? (
+              <p className={searchErrorRow}>
+                {error ?? "Couldn't load results. Try again."}
+              </p>
+            ))}
+          {status === "empty" &&
+            (renderEmpty?.(query) ?? (
+              <p className={searchEmptyRow}>No results for “{query.trim()}”</p>
+            ))}
+          {status === "success" &&
+            results.map((item, index) => (
+              <button
+                key={getKey?.(item, index) ?? index}
+                type="button"
+                role="option"
+                aria-selected={false}
+                onClick={() => onSelect?.(item)}
+                className={searchOption}
+              >
+                {renderItem?.(item) ?? String(item)}
+              </button>
+            ))}
+        </div>
+      )}
+    </div>
+  );
+}
+Search.displayName = "Search";
+export { Search };
+`,
+      },
+    ],
+    registryDependencies: [],
+    npmDependencies: ["clsx","tailwind-merge","lucide-react"],
+    css: null,
+  },
   "sidebar": {
     name: "sidebar",
     description: "A collapsible navigation sidebar with nested groups, badges, and tooltips",
